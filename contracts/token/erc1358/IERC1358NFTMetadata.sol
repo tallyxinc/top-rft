@@ -19,7 +19,7 @@ contract IERC1358NFTMetadata is IERC1358NFT {
       
     /**
      * @dev Returns Unique Resource Identifier of ERC-1358 Non-Fungible Token
-     * @param _tokenId Unique Non-Fungible Token identifier
+     * @param _tokenId - Unique Non-Fungible Token identifier
      */
     function tokenURI(uint256 _tokenId) public view returns (string);
 }

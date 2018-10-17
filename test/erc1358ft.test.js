@@ -89,9 +89,9 @@ contract('ERC1358FT', accounts => {
         it('should check owner balance and { tokenHolder[owner] == true } statement', async () => {
             let balance = await erc1358Enum.balanceOf(owner);
             assert.equal(new BigNumber(balance).valueOf(), totalSupply.valueOf(), "balance is not equal");
-            let registryLength = await erc1358Enum.holdersRegistryLength();
+            let registryLength = await erc1358Enum.holdersCount();
             assert.equal(new BigNumber(registryLength).valueOf(), 1, "registryLength is not equal");
-            let tokenHolder = await erc1358Enum.getTokenHolder(0);
+            let tokenHolder = await erc1358Enum.holderByIndex(0);
             assert.equal(tokenHolder, owner, "tokenHolder is not equal");
             let tokenHolderStatus = await erc1358Enum.tokenHolders.call(owner);
             assert.equal(tokenHolderStatus, true, "tokenHolderStatus is not equal");
@@ -172,7 +172,7 @@ contract('ERC1358FT', accounts => {
             let isTokenHolder = await erc1358ft.tokenHolders.call(to);
             assert.equal(isTokenHolder, true, "isTokenHolder is not equal");
 
-            let registryLength = await erc1358ft.holdersRegistryLength();
+            let registryLength = await erc1358ft.holdersCount();
             assert.equal(new BigNumber(registryLength).valueOf(), new BigNumber('2'), "registryLength is not equal");
         });
 
@@ -275,7 +275,7 @@ contract('ERC1358FT', accounts => {
             let isTokenHolder = await erc1358ft.tokenHolders.call(to);
             assert.equal(isTokenHolder, true, "isTokenHolder is not equal");
 
-            let registryLength = await erc1358ft.holdersRegistryLength();
+            let registryLength = await erc1358ft.holdersCount();
             assert.equal(new BigNumber(registryLength).valueOf(), new BigNumber('2'), "registryLength is not equal");
         });
 
@@ -338,29 +338,137 @@ contract('ERC1358FT', accounts => {
             tokenHolder = await erc1358ft.tokenHolders.call(receivers[2]);
             assert.equal(tokenHolder, true, "tokenHolder is not equal");
 
-            let allTokenHolders = await erc1358ft.getTokenHolders();
-            assert.equal(allTokenHolders[0], owner, "tokenHolders[0] is not equal");
-            assert.equal(allTokenHolders[1], receivers[0], "tokenHolders[1] is not equal");
-            assert.equal(allTokenHolders[2], receivers[1], "tokenHolders[2] is not equal");
-            assert.equal(allTokenHolders[3], receivers[2], "tokenHolders[3] is not equal");
-
-            let getHolder = await erc1358ft.getTokenHolder(0);
+            let getHolder = await erc1358ft.holderByIndex(0);
             assert.equal(getHolder, owner, "getTokenHolder[0] is not equal");
-            getHolder = await erc1358ft.getTokenHolder(1);
+            getHolder = await erc1358ft.holderByIndex(1);
             assert.equal(getHolder, receivers[0], "getTokenHolder[1] is not equal");
-            getHolder = await erc1358ft.getTokenHolder(2);
+            getHolder = await erc1358ft.holderByIndex(2);
             assert.equal(getHolder, receivers[1], "getTokenHolder[2] is not equal");
-            getHolder = await erc1358ft.getTokenHolder(3);
+            getHolder = await erc1358ft.holderByIndex(3);
             assert.equal(getHolder, receivers[2], "getTokenHolder[3] is not equal");
 
-            let holdersBalances = await erc1358ft.getTokenHoldersBalances();
-            assert.equal(new BigNumber(holdersBalances[0]).valueOf(), new BigNumber('400').mul(precision).valueOf(), "holdersBalances[0] is not equal");
-            holdersBalances = await erc1358ft.getTokenHoldersBalances();
-            assert.equal(new BigNumber(holdersBalances[1]).valueOf(), new BigNumber('100').mul(precision).valueOf(), "holdersBalances[1] is not equal");
-            holdersBalances = await erc1358ft.getTokenHoldersBalances();
-            assert.equal(new BigNumber(holdersBalances[2]).valueOf(), new BigNumber('200').mul(precision).valueOf(), "holdersBalances[2] is not equal");
-            holdersBalances = await erc1358ft.getTokenHoldersBalances();
-            assert.equal(new BigNumber(holdersBalances[3]).valueOf(), new BigNumber('300').mul(precision).valueOf(), "holdersBalances[3] is not equal");
+            let holders = await erc1358ft.holders(0,4);
+            assert.equal(holders[0][0], owner, "address of holder[0][0] is not equal")
+            assert.equal(new BigNumber(holders[1][0]).valueOf(), new BigNumber(400).mul(precision).valueOf(), "balance of holder[0][0] not equal");
+            assert.equal(holders[0][1], receivers[0], "address of holder[0][1] is not equal")
+            assert.equal(new BigNumber(holders[1][1]).valueOf(), new BigNumber(100).mul(precision).valueOf(), "balance of holder[0][1] not equal");
+            assert.equal(holders[0][2], receivers[1], "address of holder[0][2] is not equal")
+            assert.equal(new BigNumber(holders[1][2]).valueOf(), new BigNumber(200).mul(precision).valueOf(), "balance of holder[0][2] not equal");
+            assert.equal(holders[0][3], receivers[2], "address of holder[0][3] is not equal")
+            assert.equal(new BigNumber(holders[1][3]).valueOf(), new BigNumber(300).mul(precision).valueOf(), "balance of holder[0][3] not equal");
+
+        
+            // cause is bigger than holders count
+            await erc1358ft.holders(0,5)
+                .then(Utils.receiptShouldFailed)
+                .catch(Utils.catchReceiptShouldFailed);
+
+            // cause less than min index
+            await erc1358ft.holders(-1,3)
+                .then(Utils.receiptShouldFailed)
+                .catch(Utils.catchReceiptShouldFailed);
+        });
+
+        it('should check batchTransferFrom', async () => {
+            let approvalAgent = accounts[5];
+            let approvalSum = new BigNumber('600').mul(precision);
+            let receivers = [accounts[2], accounts[3], accounts[4]];
+            let values = [
+                new BigNumber('100').mul(precision),
+                new BigNumber('200').mul(precision),
+                new BigNumber('300').mul(precision)
+            ];
+            let errorValues1 = [
+                new BigNumber('100').mul(precision),
+                new BigNumber('200').mul(precision)
+            ];
+            let errorValues2 = [
+                new BigNumber('100').mul(precision),
+                new BigNumber('200').mul(precision),
+                new BigNumber('701').mul(precision)  
+            ];
+
+            await erc1358ft.approve(0x0, approvalSum, {from: owner})
+                .then(Utils.receiptShouldFailed)
+                .catch(Utils.catchReceiptShouldFailed);
+
+            await erc1358ft.approve(approvalAgent, approvalSum, {from: owner})
+                .then(Utils.receiptShouldSucceed);
+
+            let allowance = await erc1358ft.allowance(owner, approvalAgent);
+            assert.equal(new BigNumber(allowance).valueOf(), approvalSum.valueOf(), "allowance is not equal");
+
+            let balanceOf = await erc1358ft.balanceOf(receivers[0]);
+            assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('0').valueOf(), "balanceOf is not equal");
+            let tokenHolder = await erc1358ft.tokenHolders.call(receivers[0]);
+            assert.equal(tokenHolder, false, "tokenHolder is not equal");
+
+            balanceOf = await erc1358ft.balanceOf(receivers[1]);
+            assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('0').valueOf(), "balanceOf is not equal");
+            tokenHolder = await erc1358ft.tokenHolders.call(receivers[1]);
+            assert.equal(tokenHolder, false, "tokenHolder is not equal");
+
+            balanceOf = await erc1358ft.balanceOf(receivers[2]);
+            assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('0').valueOf(), "balanceOf is not equal");
+            tokenHolder = await erc1358ft.tokenHolders.call(receivers[2]);
+            assert.equal(tokenHolder, false, "tokenHolder is not equal");
+
+            await erc1358ft.batchTransferFrom(owner, receivers, errorValues1, {from: approvalAgent})
+                .then(Utils.receiptShouldFailed)
+                .catch(Utils.catchReceiptShouldFailed);
+
+            await erc1358ft.batchTransferFrom(owner, receivers, errorValues2, {from: approvalAgent})
+                .then(Utils.receiptShouldFailed)
+                .catch(Utils.catchReceiptShouldFailed);
+
+            await erc1358ft.batchTransferFrom(owner, receivers, values, {from: approvalAgent})
+                .then(Utils.receiptShouldSucceed);
+
+
+            balanceOf = await erc1358ft.balanceOf(receivers[0]);
+            assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('100').mul(precision).valueOf(), "balanceOf is not equal");
+            tokenHolder = await erc1358ft.tokenHolders.call(receivers[0]);
+            assert.equal(tokenHolder, true, "tokenHolder is not equal");
+
+            balanceOf = await erc1358ft.balanceOf(receivers[1]);
+            assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('200').mul(precision).valueOf(), "balanceOf is not equal");
+            tokenHolder = await erc1358ft.tokenHolders.call(receivers[1]);
+            assert.equal(tokenHolder, true, "tokenHolder is not equal");
+
+            balanceOf = await erc1358ft.balanceOf(receivers[2]);
+            assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('300').mul(precision).valueOf(), "balanceOf is not equal");
+            tokenHolder = await erc1358ft.tokenHolders.call(receivers[2]);
+            assert.equal(tokenHolder, true, "tokenHolder is not equal");
+
+            let getHolder = await erc1358ft.holderByIndex(0);
+            assert.equal(getHolder, owner, "getTokenHolder[0] is not equal");
+            getHolder = await erc1358ft.holderByIndex(1);
+            assert.equal(getHolder, receivers[0], "getTokenHolder[1] is not equal");
+            getHolder = await erc1358ft.holderByIndex(2);
+            assert.equal(getHolder, receivers[1], "getTokenHolder[2] is not equal");
+            getHolder = await erc1358ft.holderByIndex(3);
+            assert.equal(getHolder, receivers[2], "getTokenHolder[3] is not equal");
+
+            let holders = await erc1358ft.holders(0,4);
+            assert.equal(holders[0][0], owner, "address of holder[0][0] is not equal")
+            assert.equal(new BigNumber(holders[1][0]).valueOf(), new BigNumber(400).mul(precision).valueOf(), "balance of holder[0][0] not equal");
+            assert.equal(holders[0][1], receivers[0], "address of holder[0][1] is not equal")
+            assert.equal(new BigNumber(holders[1][1]).valueOf(), new BigNumber(100).mul(precision).valueOf(), "balance of holder[0][1] not equal");
+            assert.equal(holders[0][2], receivers[1], "address of holder[0][2] is not equal")
+            assert.equal(new BigNumber(holders[1][2]).valueOf(), new BigNumber(200).mul(precision).valueOf(), "balance of holder[0][2] not equal");
+            assert.equal(holders[0][3], receivers[2], "address of holder[0][3] is not equal")
+            assert.equal(new BigNumber(holders[1][3]).valueOf(), new BigNumber(300).mul(precision).valueOf(), "balance of holder[0][3] not equal");
+
+        
+            // cause is bigger than holders count
+            await erc1358ft.holders(0,5)
+                .then(Utils.receiptShouldFailed)
+                .catch(Utils.catchReceiptShouldFailed);
+
+            // cause less than min index
+            await erc1358ft.holders(-1,3)
+                .then(Utils.receiptShouldFailed)
+                .catch(Utils.catchReceiptShouldFailed);
         });
     });
 });

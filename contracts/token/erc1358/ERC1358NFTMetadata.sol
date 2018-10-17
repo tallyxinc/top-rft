@@ -6,10 +6,10 @@ import './ERC1358NFT.sol';
 contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
 
     // Name for a set of Non-Fungible tokens
-    string internal _name;
+    string internal name_;
 
     // Symbol (abbreviated from name) for a set of Non-Fungible tokens
-    string internal _symbol;
+    string internal symbol_;
 
     // Registry of token Uniform Resource Identifiers
     mapping (uint256 => string) private _tokenURIs;
@@ -25,34 +25,34 @@ contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
 
     /**
      * @dev Constructor for ERC-1358 contract extended with metadata
-     * @param name Name for a set of NFTs
-     * @param symbol Symbol for a set of NFTs
+     * @param _name - Name for a set of NFTs
+     * @param _symbol - Symbol for a set of NFTs
      */
     constructor (
-        string name,
-        string symbol
+        string _name,
+        string _symbol
     ) public {
-        _name = name;
-        _symbol = symbol;
+        name_ = _name;
+        symbol_ = _symbol;
     }
 
     /**
      * @dev Getter for ERC-1358 name
      */
     function name() external view returns (string) {
-        return _name;
+        return name_;
     }
 
     /**
      * @dev Getter for ERC-1358 symbol
      */
     function symbol() external view returns (string) {
-        return _symbol;
+        return symbol_;
     }
 
     /**
-     * @dev Get URI (Uniform Resource Identifier) for specified Non-Fungible token
-     * @param _tokenId Unique identifier of Non-Fungible token
+     * @dev Get Uniform Resource Identifier of selected NFT 
+     * @param _tokenId - Unique identifier of NFT
      */
     function tokenURI(uint256 _tokenId) 
         public 
@@ -64,9 +64,9 @@ contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
     }
 
     /**
-     * @dev Set URI (Uniform Resource Identifier) for a specified Non-Fungible token
-     * @param _tokenId Unique identifier of Non-Fungible token
-     * @param _uri URI string 
+     * @dev Set Uniform Resource Identifier for selected NFT 
+     * @param _tokenId - Unique identifier of NFT
+     * @param _uri - URI string 
      */
     function _setTokenURI(
         uint256 _tokenId,
@@ -77,18 +77,22 @@ contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
     }
 
     /**
-     * @dev Burn Non-Fungible token for specified NFT holder
-     * @param _owner Address of Non-Fungible token holder
-     * @param _tokenId Unique identifier of Non-Fungible token
+     * @dev Burn NFT 
+     * @param _owner - Address of Non-Fungible token owner
+     * @param _tokenId - Unique identifier of NFT
      */
     function _burn(
         address _owner, 
         uint256 _tokenId
-    ) internal {
+    ) 
+        internal 
+        returns (bool)
+    {
         super._burn(_owner, _tokenId);
         // Clear metadata (if any)
         if (bytes(_tokenURIs[_tokenId]).length != 0) {
-          delete _tokenURIs[_tokenId];
+            delete _tokenURIs[_tokenId];
         }
+        return true;
     }
 }

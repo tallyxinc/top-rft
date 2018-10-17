@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import './IERC1358FTFull.sol';
 import './IERC1358NFTFull.sol';
 
 /**
@@ -14,51 +13,111 @@ contract IERC1358 is IERC1358NFTFull {
     using SafeMath for uint256;
 
     /**
-     * @dev Mint Non-Fungible Token and create Fungible token that will supply its value
-     * @param name Name for a Fungible Token
-     * @param symbol Symbol abbreviated from Fungible Token name
-     * @param decimals Precision for token amount calculations
-     * @param tokenOwner Address of NFT and FT token owner
-     * @param fungibleTokenSupply Total token amount for FT
+     * @dev Creates FT with specified parameters
+     * @param _name - Name for FT
+     * @param _symbol - Symbol for FT
+     * @param _decimals - Precision amount for FT
+     * @param _tokenOwner - Address of FT owner
+     * @param _fungibleTokenSupply - Max token supply for FT
+     * @param _tokenId - Unique identifier of NFT related to this FT
      */
-    function createToken(
-        string name,
-        string symbol,
-        uint256 decimals,
-        address tokenOwner, 
-        uint256 fungibleTokenSupply
-    ) public;
+    function _createFT(
+        string _name,
+        string _symbol,
+        uint256 _decimals,
+        address _tokenOwner,
+        uint256 _fungibleTokenSupply,
+        uint256 _tokenId
+    ) 
+        internal
+        returns (address);
+
+    /** 
+     * @dev Mint NFT token and create FT accordingly
+     * @param _name - Name for FT
+     * @param _symbol - Symbol for FT
+     * @param _decimals - Precision amount for FT
+     * @param _tokenOwner - Address of FT owner
+     * @param _fungibleTokenSupply - Max token supply for FT
+     */
+    function mint(
+        string _name,
+        string _symbol,
+        uint256 _decimals,
+        address _tokenOwner,
+        uint256 _fungibleTokenSupply
+    ) 
+        public
+        returns (uint256);
+
+    /** 
+     * @dev Burn NFT and delete FT data
+     * @param _owner - owner address of NFT to burn
+     * @param _tokenId - Unique identifier of NFT
+     */
+    function burn(
+        address _owner,
+        uint256 _tokenId
+    ) 
+        public
+        returns (bool);
 
     /**
-     * @dev Get FT token balance of NFT holder
-     * @param _tokenId Unique identifier of Non-Fungible Token
-     * @param _holder ETH Address of NFT holder
+     * @dev Returns value of selected NFT
+     * @param _tokenId - Unique identifier of NFT
      */
-    function getFungibleTokenHolderBalance(
+    function nftValue(
+        uint256 _tokenId
+    ) 
+        public
+        view 
+        returns (uint256);
+
+    /** 
+     * @dev Returns FT token balance of specified NFT
+     * @param _holder - Holder address 
+     * @param _tokenId - Unique identifier of NFT
+     */
+    function ftHolderBalance(
         uint256 _tokenId,
         address _holder
-    ) public view returns (uint256 _value);
+    ) 
+        public 
+        view 
+        returns (uint256);
 
     /**
-     * @dev Returns array of token holders ETH addresses by NFT id
-     * @param _tokenId Unique identifier of Non-Fungible Token
+     * @dev Returns all FT token holders and their balances of specified NFT
+     * @param _tokenId - Unique identifier of NFT
+     * @param _indexFrom - Start index inside array of token holders
+     * @param _indexTo - End index inside array of token holders
      */
-    function getFungibleTokenHolders(uint256 _tokenId) 
-        public view returns (address[] _holders);
+    function ftHoldersBalances(
+        uint256 _tokenId,
+        uint256 _indexFrom,
+        uint256 _indexTo
+    ) 
+        public
+        view
+        returns (address[], uint256[]);
 
     /**
-     * @dev Returns array of NFT token holders FT balances
-     * @param _tokenId Unique identifier of Non-Fungible Token
+     * @dev Returns FT token holders amount of specified NFT
+     * @param _tokenId - Unique identifier of NFT
      */
-    function getFungibleTokenHolderBalances(uint256 _tokenId) 
-        public view returns (address[] _holders, uint256[] _balances);
+    function ftHoldersCount(uint256 _tokenId)
+        public
+        view
+        returns (uint256);
 
     /**
-     * @dev Returns ETH address of FT by NFT id it supplies
-     * @param _tokenId Unique identifier of Non-Fungible Token
+     * @dev Returns FT smart contract address of specified NFT
+     * @param _tokenId - Unique identifier of NFT
      */
-    function getFungibleTokenAddress(uint256 _tokenId) 
-        public view returns (IERC1358FTFull _erc20CompatibleInterface);
+    function ftAddress(uint256 _tokenId)
+        public
+        view
+        returns (address _ftAddress);
 }
 
 

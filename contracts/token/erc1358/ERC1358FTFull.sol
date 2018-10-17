@@ -8,43 +8,44 @@ import './ERC1358FTEnumerable.sol';
 contract ERC1358FTFull is ERC1358FT, ERC1358FTMetadata, ERC1358FTEnumerable {
     /**
      * @dev Constructor for ERC1358FT full implementation contract
-     * @param name Name for FT
-     * @param symbol Symbol for FT
-     * @param decimals Precision amount for FT
-     * @param totalSupply Max token supply ofr FT
-     * @param nftAddress Address of main NFT contract
-     * @param initialTokenId Unique identifier of dependent NFT
-     * @param owner Address of FT owner
+     * @param _name - Name for FT
+     * @param _symbol - Symbol for FT
+     * @param _decimals - Precision amount for FT
+     * @param _totalSupply - Max token supply ofr FT
+     * @param _nftAddress - Address of main NFT contract
+     * @param _initialTokenId - Unique identifier of dependent NFT
+     * @param _owner - Address of FT owner
      */
 	constructor (
-		string name,
-		string symbol,
-		uint256 decimals,
-		uint256 totalSupply,
-		address nftAddress,
-		uint256 initialTokenId,
-        address owner
+		string _name,
+		string _symbol,
+		uint256 _decimals,
+		uint256 _totalSupply,
+		address _nftAddress,
+		uint256 _initialTokenId,
+        address _owner
 	)
 		public 
 		ERC1358FTMetadata(
-			name,
-			symbol,
-			decimals
+			_name,
+			_symbol,
+			_decimals
 		)
 		ERC1358FTEnumerable(
-			totalSupply,
-			nftAddress,
-			initialTokenId,
-            owner
+			_totalSupply,
+			_nftAddress,
+			_initialTokenId,
+            _owner
 		) 
 	{
 		
 	}
 
     /** 
-     * @dev Batch transfer for FT
-     * @param _receivers Array of token receivers 
-     * @param _values Array of token values
+     * @dev Transfer specified token amounts from token holder to receipients
+     * @notice Means that _receivers[index] address will get _values[index] tokens
+     * @param _receivers - Array of FT's receivers addresses
+     * @param _values - Array of FT's amount
      */
     function batchTransfer(
         address[] _receivers,
@@ -60,10 +61,33 @@ contract ERC1358FTFull is ERC1358FT, ERC1358FTMetadata, ERC1358FTEnumerable {
         return true;
     }
 
+    /**
+     * @dev Transfer specified token amounts from token holder to receipients
+     * @notice Allowance balance will be decreased with _values
+     * @param _from - Holder of NFT's
+     * @param _receivers - Array of FT's receivers addresses
+     * @param _values - Array of FT's amount
+     */
+    function batchTransferFrom(
+        address _from,
+        address[] _receivers,
+        uint256[] _values
+    )
+        public
+        returns (bool)
+    {
+        require(_receivers.length == _values.length);
+        for (uint256 i = 0; i < _receivers.length; i++) {
+            require(transferFrom(_from, _receivers[i], _values[i]) == true);
+        }
+        return true;
+    }
+
     /** 
-     * @dev Overrided transfer function, to transfer function
-     * @param _to Address of token receiver
-     * @param _amount Token amount to transfer
+     * @dev Overrided transfer function
+     * @notice Require function caller to be token holder
+     * @param _to - Address of token receiver
+     * @param _amount - Token amount to transfer
      */
 	function transfer(
         address _to,
@@ -83,9 +107,9 @@ contract ERC1358FTFull is ERC1358FT, ERC1358FTMetadata, ERC1358FTEnumerable {
 
     /**
      * @dev Overrided transferFrom function, to transferFrom function
-     * @param _from Address of token sender
-     * @param _to Address of token receiver
-     * @param _amount Token amount to transfer
+     * @param _from - Address of token sender
+     * @param _to - Address of token receiver
+     * @param _amount - Token amount to transfer
      */
     function transferFrom(
         address _from,

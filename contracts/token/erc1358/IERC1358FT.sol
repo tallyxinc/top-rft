@@ -31,7 +31,7 @@ interface IERC1358FT {
      * @notice Returns value of specified address of Fungible Token 
      * @dev Fungible Token amount is a supply for Non-Fungible Token value,
      * may fail in case _address is invalid
-     * @param _address ETH address of token holder
+     * @param _address - ETH address of token holder
      * @return Fungible Token balance 
      */
     function balanceOf(address _address) 
@@ -42,8 +42,8 @@ interface IERC1358FT {
     /**
      * @notice Transfer of Fungible Token
      * @dev Throws if token owner hasn't got enough tokens
-     * @param _to Address of Fungible Token receiver
-     * @param _amount Transferable amount of Non-Fungible Token
+     * @param _to - Address of Fungible Token receiver
+     * @param _amount - Transferable amount of Non-Fungible Token
      */
     function transfer(
         address _to,
@@ -54,8 +54,8 @@ interface IERC1358FT {
      * @notice Approve specified address as operator for token distributing
      * Throws if _spender is invalid address or token owner hasnt' got 
      * tokens equal to _amount
-     * @param _operator Approval address for Fungible Token
-     * @param _amount The approval amount of Fungible Token
+     * @param _operator - Approval address for Fungible Token
+     * @param _amount - The approval amount of Fungible Token
      */
     function approve(
         address _operator,
@@ -66,9 +66,9 @@ interface IERC1358FT {
      * @notice Transfer from of Fungible Token
      * @dev Throws if token owner hasn't got enough tokens or 
      * msg.sender is not owner or approved operator
-     * @param _from Address of Fungible Token owner
-     * @param _to Address of Fungible Token receiver
-     * @param _amount Transferable amount of Non-Fungible Token
+     * @param _from - Address of Fungible Token owner
+     * @param _to - Address of Fungible Token receiver
+     * @param _amount - Transferable amount of Non-Fungible Token
      */
     function transferFrom(
         address _from,
@@ -80,8 +80,8 @@ interface IERC1358FT {
      * @notice Returns approved Fungible Token amount for specified operator address
      * Throws if _owner or _operator is invalid address, or _owner hasn't approved token for
      * specified _operator
-     * @param _owner Address of Fungible Token owner
-     * @param _operator Address of approved operator for Fungible Token
+     * @param _owner - Address of Fungible Token owner
+     * @param _operator - Address of approved operator for Fungible Token
      * @return Allowed amount for _operator to manage
      */
     function allowance(

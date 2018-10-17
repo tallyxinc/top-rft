@@ -7,17 +7,17 @@ import './ERC1358NFTEnumerable.sol';
 contract ERC1358NFTFull is ERC1358NFT, ERC1358NFTMetadata, ERC1358NFTEnumerable {
     /**
      * @dev Constructor for full ERC-1358 NFT contract
-     * @param name Name for a set of NFTs
-     * @param symbol Symbol (abbreviated from name) for a set of NFTs
+     * @param _name - Name for a set of NFTs
+     * @param _symbol - Symbol (abbreviated from name) for a set of NFTs
      */
     constructor (
-        string name,
-        string symbol
+        string _name,
+        string _symbol
     ) 
         public 
         ERC1358NFTMetadata(
-            name,
-            symbol
+            _name,
+            _symbol
         ) 
     {
         

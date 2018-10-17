@@ -13,27 +13,29 @@ contract ERC1358FT is IERC1358FT {
     mapping (address => mapping (address => uint256)) public _allowed;
 
     // Total supply of Fungible Token 
-    uint256 private _totalSupply;
+    uint256 private totalSupply_;
 
     /**
-    * @dev Returns total supply of Fungible Token
+    * @dev Returns all supply of tokens that was initially created
     */
     function totalSupply() public view returns (uint256) {
-        return _totalSupply;
+        return totalSupply_;
     }
 
     /**
-    * @dev Returns Fungible Token balance of specified holder
-    * @param _address ETH address of token holder
+    * @dev Returns fungible token balance of specific address
+    * @param _address - ETH address of FT holder
     */
     function balanceOf(address _address) public view returns (uint256) {
         return _balances[_address];
     }
 
     /**
-    * @dev Transfer specified amount of Fungible Tokens
-    * @param _to Fungible Token receiver
-    * @param _amount Quantity of transferable Fungible Tokens
+    * @dev Transfer specified amount of tokens from token holder to
+    * receipient, could throw in case function caller has not enough tokens
+    * @notice owner means holder of FT's
+    * @param _to - New holder of FT's
+    * @param _amount - Amount of FT's to be transfered
     */
     function transfer(
         address _to,
@@ -52,9 +54,11 @@ contract ERC1358FT is IERC1358FT {
     }
 
     /**
-    * @dev Approve specified amount of Fungible Tokens to be managed by operator
-    * @param _operator ETH address of operator
-    * @param _amount Approval Fungible Token amount
+    * @dev Allow _operator to withdraw from your account, multiple times, 
+    * up to the _amount. If this function is called again it overwrites 
+    * the current allowance with _value.
+    * @param _operator - Address that allowed to withdraw from FT owner balance
+    * @param _amount - Amount of approved FT's
     */
     function approve(
         address _operator,
@@ -70,10 +74,12 @@ contract ERC1358FT is IERC1358FT {
     }
 
     /**
-    * @dev Transfer specified amount of Fungible Tokens from included address
-    * @param _from Address of Fungible Token holder
-    * @param _to Address of Fungible Token receiver
-    * @param _amount Quantity of transferable Fungible Tokens
+    * @dev Transfer specified amount of tokens from token holder to receipient,
+    * function caller address is approved address  
+    * @notice Allowance balance will be decreased with _amount
+    * @param _from - Holder of FT's to transfer from
+    * @param _to - New holder of FT's to transfer to
+    * @param _amount - Amount of FT's to be transfered
     */
     function transferFrom(
         address _from,
@@ -95,9 +101,11 @@ contract ERC1358FT is IERC1358FT {
     }
 
     /**
-    * @dev Increase approval amount of Fungible Tokens for specified operator
-    * @param _operator ETH address of Fungible Token operator
-    * @param _addedAmount Quantity of increased approval Fungible Tokens
+    * @dev Increase amount of tokens allowed to be transfered for approved 
+    * address from balance of owner 
+    * @notice owner means caller address
+    * @param _operator - Approved address
+    * @param _addedAmount - Amount to be added to approved address allowance balance
     */
     function increaseAllowance(
         address _operator,
@@ -115,9 +123,11 @@ contract ERC1358FT is IERC1358FT {
     }
 
     /**
-    * @dev Decrease approval amount of Fungible Tokens for specified operator
-    * @param _operator ETH address of Fungible Token operator
-    * @param _substractedAmount Quantity of decreased approval Fungible Tokens
+    * @dev Decrease amount of tokens allowed to be transfered for approved
+    * address from balance of owner 
+    * @notice owner means caller address
+    * @param _operator - Approved address
+    * @param _substractedAmount - Amount to be substracted from approved address allowance balance
     */
     function decreaseAllowance(
         address _operator,
@@ -135,9 +145,10 @@ contract ERC1358FT is IERC1358FT {
     }
 
     /**
-    * @dev Check allowed Fungible Token amount by token holder to operator
-    * @param _owner ETH address of Fungible token holder
-    * @param _operator ETH address of Fungible token operator
+    * @dev Returns amount of tokens allowed to be transfered for approved address
+    * from balance of owner
+    * @param _owner - Holder of FT's
+    * @param _operator - Approved address
     */
     function allowance(
         address _owner,

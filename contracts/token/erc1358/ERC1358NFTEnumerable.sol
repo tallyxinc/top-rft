@@ -28,9 +28,13 @@ contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
 	}
 
 	/**
-     * @dev Returns specified NFT of holder by index in array
-     * @param _owner Address of Non-Fungible token  holder
-     * @param _index Index of NFT in owners owned NFT's array
+     * @dev Returns NFT id owned by the supplied address and index in 
+     * the owner's NFT array.
+	 * Index could be from 0 to n, where n is owner's balance of NFT's
+	 * @notice Every address in contract has array of NFT ids, and this 
+	 * method provides ability to navigate in it.
+     * @param _owner - Address of NFT's owner
+     * @param _index - Index inside array of owner's NFT
      */
 	function tokenOfOwnerByIndex(
 		address _owner,
@@ -45,15 +49,20 @@ contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
 	}
 
     /**
-     * @dev Returns total amount of NFTs
+     * @dev Returns total amount of NFT's presented in this NFT contract
+     * @notice For example we have minted 2 NFTs for 2 users(1 NFT per 1 user), 
+     * in this case totalSupply will equal to 2
      */
 	function totalSupply() public view returns (uint256) {
 		return _allTokens.length;
 	}
 
     /**
-     * @dev Finds NFT by its index in all NFT's array
-     * @param _index Index of Non-Fungible token 
+     * @dev Returns NFT id from all NFT's array by using its index.
+     * @notice All NFT's are added during minting to array, for example
+     * we have minted 2 NFT's for 2 users, in case we call tokenByIndex(1),
+     * it will return unique NFT id, which is located by index 1
+     * @param _index - Index inside array of all NFT
      */
 	function tokenByIndex(uint256 _index) 
 		public 
@@ -65,9 +74,9 @@ contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
 	}
 
     /**
-     * @dev Transfers ownership from one token holder to another
-     * @param _to Address of new Non-Fungible token holder
-     * @param _tokenId Unique identifier of transferable NFT
+     * @dev Transfers ownership from token owner to certain receiver
+     * @param _to - Address of NFT's receiver
+     * @param _tokenId - Unique identifier for NFT
      */
 	function _addTokenTo(
 		address _to,
@@ -80,9 +89,9 @@ contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
 	}
 
     /**
-     * @dev Discards ownership for specified token holder, making NFT unassigned
-     * @param _from Address of Non-Fungible token holder who will lost ownership for it
-     * @param _tokenId Unique identifier for NFT
+     * @dev Discards ownership for specified NFT owner, making NFT unassigned
+     * @param _from - Address of NFT's owner
+     * @param _tokenId - Unique identifier for NFT
      */
 	function _removeTokenFrom(
 		address _from,
@@ -103,29 +112,37 @@ contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
 
     /** 
      * @dev Mint new NFT for specified address
-     * @param _to Address of new Non-Fungible token holder
-     * @param _tokenId Unique identifier of NFT
+     * @param _to - Address of new Non-Fungible token owner
+     * @param _tokenId - Unique identifier of NFT
      */
 	function _mint(
 		address _to,
 		uint256 _tokenId
-	) internal {
-		super._mint(_to, _tokenId);
+	) 
+		internal 
+		returns (bool)
+	{
+		require(super._mint(_to, _tokenId) == true);
 
 		_allTokensIndex[_tokenId] = _allTokens.length;
 		_allTokens.push(_tokenId);
+		
+		return true;
 	}
 
     /**
      * @dev Burn Non-Fungible token for specified NFT holder
-     * @param _owner Address of Non-Fungible token holder
-     * @param _tokenId Unique identifier of Non-Fungible token
+     * @param _owner - Address of Non-Fungible token owner
+     * @param _tokenId - Unique identifier of NFT
      */
 	function _burn(
 		address _owner,
 		uint256 _tokenId
-	) internal {
-		super._burn(_owner, _tokenId);
+	) 
+		internal 
+		returns (bool)
+	{
+		require(super._burn(_owner, _tokenId) == true);
 
 		uint256 _tokenIndex = _allTokensIndex[_tokenId];
 		uint256 _lastTokenIndex = _allTokens.length.sub(1);
@@ -137,5 +154,7 @@ contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
 		_allTokens.length--;
 		_allTokensIndex[_tokenId] = 0;
 		_allTokensIndex[_lastToken] = _tokenIndex;
+
+		return true;
 	}
 }

@@ -30,7 +30,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = accounts[1];
 		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
 		
-		await erc1358.createFungible(
+		await erc1358.mint(
 			name,
 			symbol,
 			decimals,
@@ -49,7 +49,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = 0;
 		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
 		
-		await erc1358.createFungible(
+		await erc1358.mint(
 			name,
 			symbol,
 			decimals,
@@ -68,7 +68,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = accounts[1];
 		let fungibleTokenSupply = new BigNumber('0').mul(precision);
 		
-		await erc1358.createFungible(
+		await erc1358.mint(
 			name,
 			symbol,
 			decimals,
@@ -87,7 +87,31 @@ contract('ERC1358', accounts => {
 		let tokenOwner = accounts[1];
 		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
 		
-		await erc1358.createFungible(
+		await erc1358.mint(
+			name,
+			symbol,
+			decimals,
+			tokenOwner,
+			fungibleTokenSupply,
+			{from: owner}
+		).then(Utils.receiptShouldSucceed);
+
+		let ftAddress = await erc1358.ftAddresses.call(new BigNumber('0'));
+		console.log('Fungible token address: ' + ftAddress);
+		ft1Address = ftAddress;
+
+		let nftValue = await erc1358.nftValues.call(new BigNumber('0'));
+		assert.equal(new BigNumber(nftValue).valueOf(), fungibleTokenSupply.valueOf(), "nftValue is not equal");
+	});
+
+	it('should check burn', async () => {
+		let name = "toki_1";
+		let symbol = "TK1";
+		let decimals = 18;
+		let tokenOwner = accounts[1];
+		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
+		
+		await erc1358.mint(
 			name,
 			symbol,
 			decimals,
@@ -103,91 +127,18 @@ contract('ERC1358', accounts => {
 		let nftValue = await erc1358.nftValues.call(new BigNumber('0'));
 		assert.equal(new BigNumber(nftValue).valueOf(), fungibleTokenSupply.valueOf(), "nftValue is not equal");
 
-		let ftOfOwner = await erc1358.ftOwners.call(tokenOwner);
-		assert.equal(ftOfOwner, ftAddress, "fungibleToken of owner is not equal");
+		await erc1358.burn(tokenOwner, new BigNumber('0'))
+			.then(Utils.receiptShouldSucceed);
 
-		let fungibleTokenFromArray = await erc1358.fungibleTokens.call(new BigNumber('0'));
-		assert.equal(fungibleTokenFromArray, ftAddress, "fungibleToken address from array is not equal");
+		ftAddress = await erc1358.ftAddresses.call(new BigNumber('0'));
+		assert.equal(ftAddress, 0x0, "address is not equal");
+
+		nftValue = await erc1358.nftValue.call(new BigNumber('0'));
+		assert.equal(nftValue, 0, "nftValue is not equal");
 	});
 
-	it('should check mint function', async () => {
-		let to = accounts[2];
-		let tokenId = 100;
-
-		await erc1358.mint(to, tokenId, {from: accounts[3]})
-			.then(Utils.receiptShouldFailed)
-			.catch(Utils.catchReceiptShouldFailed);
-
-		await erc1358.mint(to, tokenId, {from: to})
-			.then(Utils.receiptShouldFailed)
-			.catch(Utils.catchReceiptShouldFailed);
-
-		await erc1358.mint(to, tokenId, {from: owner})
-			.then(Utils.receiptShouldSucceed);
-
-		let balanceOf = await erc1358.balanceOf(to);
-		assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('1').valueOf(), "balanceOf is not equal");
-		
-		let ownerOf = await erc1358.ownerOf(tokenId);
-		assert.equal(ownerOf, to, "ownerOf is not equal");
-		
-		let allTokens = await erc1358._allTokens.call(0);
-		assert.equal(new BigNumber(allTokens).valueOf(), tokenId, "allTokens is not equal");
-		
-		let tokenOfOwnerByIndex = await erc1358.tokenOfOwnerByIndex(to, 0);
-		assert.equal(new BigNumber(tokenOfOwnerByIndex).valueOf(), tokenId, "tokenOfOwnerByIndex is not equal");
-
-		let tokenByIndex = await erc1358.tokenByIndex(0);
-		assert.equal(new BigNumber(tokenByIndex).valueOf(), tokenId, "tokenByIndex is not equal");
-	});
-
-	it('should check burn function', async () => {
-		let to = accounts[2];
-		let tokenId = 100;
-		let tokenIdSecond = 200;
-
-		await erc1358.mint(to, tokenId, {from: owner})
-			.then(Utils.receiptShouldSucceed);
-
-		let balanceOf = await erc1358.balanceOf(to);
-		assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('1').valueOf(), "balanceOf is not equal");
-
-		let tokenByIndex = await erc1358.tokenOfOwnerByIndex(to, 0);
-		assert.equal(new BigNumber(tokenByIndex).valueOf(), tokenId, "tokenOfOwnerByIndex is not equal");
-
-		await erc1358.mint(to, tokenIdSecond, {from: owner})
-			.then(Utils.receiptShouldSucceed);
-
-		tokenByIndex = await erc1358.tokenOfOwnerByIndex(to, 1);
-		assert.equal(new BigNumber(tokenByIndex).valueOf(), tokenIdSecond, "tokenOfOwnerByIndex is not equal");
-
-		balanceOf = await erc1358.balanceOf(to);
-		assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('2').valueOf(), "balanceOf is not equal");
-
-		await erc1358.burn(to, tokenId, {from: accounts[3]})
-			.then(Utils.receiptShouldFailed)
-			.catch(Utils.catchReceiptShouldFailed);
-
-		await erc1358.burn(to, tokenId, {from: to})
-			.then(Utils.receiptShouldFailed)
-			.catch(Utils.catchReceiptShouldFailed);
-
-		await erc1358.burn(to, tokenId, {from: owner})
-			.then(Utils.receiptShouldSucceed);
-
-		balanceOf = await erc1358.balanceOf(to);
-		assert.equal(new BigNumber(balanceOf).valueOf(), new BigNumber('1').valueOf(), "balanceOf is not equal");		
-
-		tokenByIndex = await erc1358.tokenOfOwnerByIndex(to, 0);
-		assert.equal(new BigNumber(tokenByIndex).valueOf(), tokenIdSecond, "tokenOfOwnerByIndex is not equal");
-
-		await erc1358.ownerOf(tokenId)
-			.then(Utils.receiptShouldFailed)
-			.catch(Utils.catchReceiptShouldFailed);
-	});
-
-	describe('Check updateNonFungibleValue | getNonFungibleValue | getFungibleTokenHolderBalance' + 
-		'| getFungibleTokenHolders | getFungibleTokenHolderBalances | getFungibleTokenAddress', () => {
+	describe('Check nftValue | ftHolderBalance | ftHoldersBalances' + 
+		'| ftHoldersCount | ftAddress', () => {
 
 		let firstFungible, secondFungible;
 
@@ -202,7 +153,7 @@ contract('ERC1358', accounts => {
 			let fungibleTokenSupply_1 = new BigNumber('1000').mul(precision);
 			let fungibleTokenSupply_2 = new BigNumber('500').mul(precision);
 		
-			await erc1358.createFungible(
+			await erc1358.mint(
 				name_1,
 				symbol_1,
 				decimals,
@@ -212,7 +163,7 @@ contract('ERC1358', accounts => {
 			).then(Utils.receiptShouldSucceed);
 			firstFungible = await erc1358.ftAddresses.call(0);
 
-			await erc1358.createFungible(
+			await erc1358.mint(
 				name_2,
 				symbol_2,
 				decimals,
@@ -223,339 +174,194 @@ contract('ERC1358', accounts => {
 			secondFungible = await erc1358.ftAddresses.call(1);
 		});
 
-		it('should check updateNonFungibleValue', async () => {
+		it('should check nftValue', async () => {
 			let tokenId = 0;
-			let newValue = new BigNumber('999').valueOf();
-			let newValueSecond = new BigNumber('998').valueOf();
-			let uncorrectNewValue = new BigNumber('1000').valueOf();
-			
-			await erc1358.updateNonFungibleValue(tokenId, newValue, {from: accounts[3]})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
+			let value = new BigNumber('1000').mul(precision);
 
-			await erc1358.updateNonFungibleValue(tokenId, uncorrectNewValue, {from: accounts[1]})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.updateNonFungibleValue(tokenId, newValue, {from: owner})
-				.then(Utils.receiptShouldSucceed);
-
-			await erc1358.updateNonFungibleValue(tokenId, newValueSecond, {from: owner})
-				.then(Utils.receiptShouldSucceed);
-
-			let nftValue = await erc1358.nftValues.call(tokenId);
-			assert.equal(new BigNumber(nftValue).valueOf(), newValueSecond, "nftValue is not equal");
+			let nftValue = await erc1358.nftValue(tokenId);
+			assert.equal(new BigNumber(nftValue).valueOf(), value, "nftValue is not equal");
 		});
 
-		it('should check getNonFungibleValue', async () => {
-			let tokenId = 0;
-			let newValue = new BigNumber('500').valueOf();
-			let newValueSecond = new BigNumber('100').valueOf();
-			
-			await erc1358.updateNonFungibleValue(tokenId, newValue, {from: owner})
-				.then(Utils.receiptShouldSucceed);
-
-			let nftValue = await erc1358.getNonFungibleValue(tokenId);
-			assert.equal(new BigNumber(nftValue).valueOf(), newValue, "nftValue is not equal");
-
-			await erc1358.updateNonFungibleValue(tokenId, newValueSecond, {from: owner})
-				.then(Utils.receiptShouldSucceed);
-
-			nftValue = await erc1358.getNonFungibleValue(tokenId);
-			assert.equal(new BigNumber(nftValue).valueOf(), newValueSecond, "nftValue is not equal");
-		});
-
-		it('should check getFungibleTokenHolderBalance', async () => {
+		it('should check ftHolderBalance', async () => {
 			let tokenId = 0;
 			let tokenIdSecond = 1;
 			let holder = accounts[1];
 			let holderSecond = accounts[2];
 
-			let balanceOfHolder = await erc1358.getFungibleTokenHolderBalance(tokenId, holder);
+			let balanceOfHolder = await erc1358.ftHolderBalance(tokenId, holder);
 			assert.equal(new BigNumber(balanceOfHolder).valueOf(), new BigNumber('1000').mul(precision).valueOf(), "balanceOfHolder is not equal");
 
-			balanceOfHolder = await erc1358.getFungibleTokenHolderBalance(tokenIdSecond, holderSecond);
+			balanceOfHolder = await erc1358.ftHolderBalance(tokenIdSecond, holderSecond);
 			assert.equal(new BigNumber(balanceOfHolder).valueOf(), new BigNumber('500').mul(precision).valueOf(), "balanceOfHolder is not equal");
 		});
 
-		it('should check getFungibleTokenHolders', async () => {
+		it('should check ftHoldersBalances', async () => {
 			let tokenId = 0;
 			let tokenIdSecond = 1;
 
-			let tokenHolders = await erc1358.getFungibleTokenHolders(tokenId);
-			assert.equal(tokenHolders[0], accounts[1], "tokenHolders is not equal");
-			
-			tokenHolders = await erc1358.getFungibleTokenHolders(tokenIdSecond);
-			assert.equal(tokenHolders[0], accounts[2], "tokenHolders is not equal");
-		});
-
-		it('should check getFungibleTokenHolderBalances', async () => {
-			let tokenId = 0;
-			let tokenIdSecond = 1;
-
-			let tokenHoldersAndBalances = await erc1358.getFungibleTokenHolderBalances(tokenId);
+			let tokenHoldersAndBalances = await erc1358.ftHoldersBalances(tokenId, 0, 1);
 			let holders = tokenHoldersAndBalances[0];
 			let balances = tokenHoldersAndBalances[1];
 
 			assert.equal(holders[0], accounts[1], "holders is not equal");
 			assert.equal(new BigNumber(balances[0]).valueOf(), new BigNumber('1000').mul(precision).valueOf(), "balances is not equal");
 
-			tokenHoldersAndBalances = await erc1358.getFungibleTokenHolderBalances(tokenIdSecond);
+			tokenHoldersAndBalances = await erc1358.ftHoldersBalances(tokenIdSecond, 0, 1);
 			holders = tokenHoldersAndBalances[0];
 			balances = tokenHoldersAndBalances[1];
 
 			assert.equal(holders[0], accounts[2], "holders is not equal");
 			assert.equal(new BigNumber(balances[0]), new BigNumber('500').mul(precision).valueOf(), "balances is not equal");
-		})
 
-		it('should check getFungibleTokenAddress', async () => {
+			// cause _indexTo is bigger than holders count
+			await erc1358.ftHoldersBalances(tokenId, 0, 2)
+				.then(Utils.receiptShouldFailed)
+				.catch(Utils.catchReceiptShouldFailed);
+		});
+
+		it('should check ftHoldersCount', async () => {
 			let tokenId = 0;
 			let tokenIdSecond = 1;
 
-			let firstFungibleAddress = await erc1358.getFungibleTokenAddress(tokenId);
+			let firstTokenHoldersCount = await erc1358.ftHoldersCount(tokenId);
+			assert.equal(new BigNumber(firstTokenHoldersCount).valueOf(), 1, "holders count is not equal");
+
+			let secondTokenHoldersCount = await erc1358.ftHoldersCount(tokenIdSecond);
+			assert.equal(new BigNumber(secondTokenHoldersCount).valueOf(), 1, "holders count is not equal");
+		});
+
+		it('should check ftAddress', async () => {
+			let tokenId = 0;
+			let tokenIdSecond = 1;
+
+			let firstFungibleAddress = await erc1358.ftAddress(tokenId);
 			assert.equal(firstFungibleAddress, firstFungible, "fungibleToken address is not equal");
 
-			let secondFungibleAddress = await erc1358.getFungibleTokenAddress(tokenIdSecond);
+			let secondFungibleAddress = await erc1358.ftAddress(tokenIdSecond);
 			assert.equal(secondFungibleAddress, secondFungible, "fungibleToken address is not equal");
 		})
 	});
 
 	describe('Check NFT token flow', () => {
+
+		const name = "toki_1";
+		const symbol = "TK1";
+		const decimals = 18;
+		const tokenOwner = accounts[1];
+		const fungibleTokenSupply = new BigNumber('1000').mul(precision);
+		const tokenId = 0;
+		let fungible;
+
 		beforeEach(async () => {
-			let tokenId = 100;
-			let tokenIdSecond = 200;
-
-			let tokenOwner = accounts[1];
-			let tokenOwnerSecond = accounts[2];
-
-			await erc1358.mint(tokenOwner, tokenId)
-				.then(Utils.receiptShouldSucceed);
-			
-			await erc1358.mint(tokenOwnerSecond, tokenIdSecond)
-				.then(Utils.receiptShouldSucceed);
+			await erc1358.mint(
+				name,
+				symbol,
+				decimals,
+				tokenOwner,
+				fungibleTokenSupply,
+				{from: owner}
+			).then(Utils.receiptShouldSucceed);
+			fungible = await erc1358.ftAddresses.call(0);
 		})
 
 		it('should check balanceOf', async () => {
-			let tokenOwner = accounts[1];
-			let tokenId = 300;
 			let balance = await erc1358.balanceOf(tokenOwner);
 			assert.equal(new BigNumber(balance).valueOf(), 1, "balance is not equal");
-			await erc1358.mint(tokenOwner, tokenId)
-				.then(Utils.receiptShouldSucceed);
-			balance = await erc1358.balanceOf(tokenOwner);
-			assert.equal(new BigNumber(balance).valueOf(), 2, "balance is not equal");
 		});
 
 		it('should check ownerOf', async () => {
-			let tokenId = 100;
-			let tokenIdSecond = 200;
-			let newTokenId = 300;
-			let ownerOfNewToken = accounts[1];
-
-			await erc1358.mint(ownerOfNewToken, newTokenId)
-				.then(Utils.receiptShouldSucceed);
-
+			let receiver = accounts[2]
 			let ownerOfNFT = await erc1358.ownerOf(tokenId);
-			assert.equal(ownerOfNFT, accounts[1], "ownerOfNFT is not equal");
-			ownerOfNFT = await erc1358.ownerOf(tokenIdSecond);
-			assert.equal(ownerOfNFT, accounts[2], "ownerOfNFT is not equal");
-			ownerOfNFT = await erc1358.ownerOf(newTokenId);
-			assert.equal(ownerOfNFT, accounts[1], "ownerOfNFT is not equal");
-
+			assert.equal(ownerOfNFT, tokenOwner, "ownerOfNFT is not equal");
+		
 			await erc1358.transferFrom(
-				accounts[1],
-				accounts[2],
-				newTokenId,
-				{from: accounts[1]}
+				tokenOwner,
+				receiver,
+				tokenId,
+				{from: tokenOwner}
 			);
 
-			ownerOfNFT = await erc1358.ownerOf(newTokenId);
-			assert.equal(ownerOfNFT, accounts[2], "ownerOfNFT is not equal");
+			ownerOfNFT = await erc1358.ownerOf(tokenId);
+			assert.equal(ownerOfNFT, receiver, "ownerOfNFT is not equal");
 		});
 
 		it('should check approve and getApproved', async () => {
-			let tokenId = 100;
-			let tokenIdSecond = 200;
+			let approvalAddress = accounts[3];
 
-			let firstTokenOwner = await erc1358.ownerOf(tokenId);
-			let firstTokenApproval = accounts[3];
-			await erc1358.approve(firstTokenApproval, tokenId, {from: firstTokenOwner})
-				.then(Utils.receiptShouldSucceed);
-
-			let secondTokenOwner = await erc1358.ownerOf(tokenIdSecond);
-			let secondTokenApproval = accounts[3];
-
-			await erc1358.approve(secondTokenApproval, tokenIdSecond, {from: firstTokenOwner})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);			
-
-			await erc1358.approve(secondTokenOwner, tokenIdSecond, {from: secondTokenOwner})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.approve(secondTokenApproval, tokenIdSecond, {from: secondTokenOwner})
+			await erc1358.approve(approvalAddress, tokenId, {from: tokenOwner})
 				.then(Utils.receiptShouldSucceed);
 
 			let checkApproval = await erc1358.getApproved(tokenId);
-			assert.equal(checkApproval, firstTokenApproval, "firstTokenApproval is not equal");
-			checkApproval = await erc1358.getApproved(tokenIdSecond);
-			assert.equal(checkApproval, secondTokenApproval, "secondTokenApproval is not equal");
+			assert.equal(checkApproval, approvalAddress, "approval address is not equal");
 		});
 
 		it('should check setApprovalForAll and isApprovedForAll', async () => {
-			let tokenId = 300;
-			let tokenIdSecond = 400;
-			let tokenOwner = accounts[1];
-			let approval = accounts[3];
-
-			await erc1358.mint(tokenOwner, tokenId)
-				.then(Utils.receiptShouldSucceed);
-
-			await erc1358.mint(tokenOwner, tokenIdSecond)
-				.then(Utils.receiptShouldSucceed);
+			let approvalAddress = accounts[3];
 
 			await erc1358.setApprovalForAll(tokenOwner, true, {from: tokenOwner})
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.setApprovalForAll(approval, true, {from: tokenOwner})
+			await erc1358.setApprovalForAll(approvalAddress, true, {from: tokenOwner})
 				.then(Utils.receiptShouldSucceed);
 
-			let isApproved = await erc1358.isApprovedForAll(tokenOwner, approval);
+			let isApproved = await erc1358.isApprovedForAll(tokenOwner, approvalAddress);
 			assert.equal(isApproved, true, "isApprovedForAll is not equal");
 		});
 
 		it('should check transferFrom', async () => {
-			let tokenId = 100;
-			let newTokenId = 300;
-			let newSecondTokenId = 400;
+			let approvalAddress = accounts[3];
+			let receiver = accounts[4];
 
-			let firstTokenOwner = accounts[1];
-			let approval = accounts[3];
-
-			await erc1358.mint(firstTokenOwner, newTokenId)
-				.then(Utils.receiptShouldSucceed);
-			await erc1358.mint(firstTokenOwner, newSecondTokenId)
-				.then(Utils.receiptShouldSucceed);
-
-			await erc1358.transferFrom(firstTokenOwner, approval, tokenId)
+			await erc1358.transferFrom(tokenOwner, receiver, tokenId)
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.approve(approval, tokenId, {from: firstTokenOwner})
+			await erc1358.approve(approvalAddress, tokenId, {from: tokenOwner})
 				.then(Utils.receiptShouldSucceed);
 
-			await erc1358.transferFrom(firstTokenOwner, approval, tokenId)
+			await erc1358.transferFrom(tokenOwner, approvalAddress, tokenId)
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.transferFrom(firstTokenOwner, approval, tokenId, {from: accounts[2]})
+			await erc1358.transferFrom(tokenOwner, approvalAddress, tokenId, {from: accounts[2]})
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.transferFrom(firstTokenOwner, approval, tokenId, {from: approval})
+			await erc1358.transferFrom(tokenOwner, receiver, tokenId, {from: approvalAddress})
 				.then(Utils.receiptShouldSucceed);
 
-			let balanceOf = await erc1358.balanceOf(approval);
+			let balanceOf = await erc1358.balanceOf(receiver);
 			assert.equal(new BigNumber(balanceOf).valueOf(), 1, "balanceOf is not equal");
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newTokenId)
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newSecondTokenId)
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.setApprovalForAll(approval, true, {from: firstTokenOwner})
-				.then(Utils.receiptShouldSucceed);
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newTokenId, {from: accounts[2]})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newTokenId)
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newTokenId, {from: approval})
-				.then(Utils.receiptShouldSucceed);
-
-			balanceOf = await erc1358.balanceOf(approval);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 2, "balanceOf is not equal");
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newSecondTokenId, {from: accounts[2]})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newSecondTokenId)
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.transferFrom(firstTokenOwner, approval, newSecondTokenId, {from: approval})
-				.then(Utils.receiptShouldSucceed);
-
-			balanceOf = await erc1358.balanceOf(approval);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 3, "balanceOf is not equal");
-
-			balanceOf = await erc1358.balanceOf(firstTokenOwner);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 0, "balanceOf is not equal");
 		});
 
 		it('should check safeTransferFrom', async () => {
-			let tokenId = 100;
-			let newTokenId = 300;
+			let approvalAddress = accounts[3];
+			let receiver = accounts[4];
 
-			let firstTokenOwner = accounts[1];
-			let approval = accounts[3];
+			await erc1358.safeTransferFrom(tokenOwner, receiver, tokenId)
+				.then(Utils.receiptShouldFailed)
+				.catch(Utils.catchReceiptShouldFailed);
 
-			let balanceOf = await erc1358.balanceOf(firstTokenOwner);
+			await erc1358.approve(approvalAddress, tokenId, {from: tokenOwner})
+				.then(Utils.receiptShouldSucceed);
+
+			await erc1358.safeTransferFrom(tokenOwner, approvalAddress, tokenId)
+				.then(Utils.receiptShouldFailed)
+				.catch(Utils.catchReceiptShouldFailed);
+
+			await erc1358.safeTransferFrom(tokenOwner, approvalAddress, tokenId, {from: accounts[2]})
+				.then(Utils.receiptShouldFailed)
+				.catch(Utils.catchReceiptShouldFailed);
+
+			await erc1358.safeTransferFrom(tokenOwner, receiver, tokenId, {from: approvalAddress})
+				.then(Utils.receiptShouldSucceed);
+
+			let balanceOf = await erc1358.balanceOf(receiver);
 			assert.equal(new BigNumber(balanceOf).valueOf(), 1, "balanceOf is not equal");
-
-			await erc1358.mint(firstTokenOwner, newTokenId)
-				.then(Utils.receiptShouldSucceed);
-
-			balanceOf = await erc1358.balanceOf(firstTokenOwner);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 2, "balanceOf is not equal");
-
-			await erc1358.approve(approval, tokenId, {from: firstTokenOwner})
-				.then(Utils.receiptShouldSucceed);
-
-			await erc1358.safeTransferFrom(firstTokenOwner, approval, tokenId)
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.safeTransferFrom(firstTokenOwner, approval, tokenId, {from: accounts[2]})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.safeTransferFrom(firstTokenOwner, approval, tokenId, {from: approval})
-				.then(Utils.receiptShouldSucceed);
-
-			balanceOf = await erc1358.balanceOf(firstTokenOwner);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 1, "balanceOf is not equal");
-			balanceOf = await erc1358.balanceOf(approval);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 1, "balanceOf is not equal");
-
-			await erc1358.safeTransferFrom(firstTokenOwner, approval, newTokenId, {from: approval})
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.safeTransferFrom(firstTokenOwner, approval, newTokenId)
-				.then(Utils.receiptShouldFailed)
-				.catch(Utils.catchReceiptShouldFailed);
-
-			await erc1358.safeTransferFrom(firstTokenOwner, approval, newTokenId, {from: firstTokenOwner})
-				.then(Utils.receiptShouldSucceed);
-
-			balanceOf = await erc1358.balanceOf(firstTokenOwner);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 0, "balanceOf is not equal");
-			balanceOf = await erc1358.balanceOf(approval);
-			assert.equal(new BigNumber(balanceOf).valueOf(), 2, "balanceOf is not equal");
 		});
 
 		it('should check tokenURI', async () => {
-			let tokenId = 100;
 			let uri = await erc1358.tokenURI(tokenId);
 			assert.equal(uri, "", "uri is not equal");
 		});

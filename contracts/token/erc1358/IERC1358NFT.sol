@@ -44,7 +44,7 @@ interface IERC1358NFT {
      * @notice Count all NFTs assigned to an owner
      * @dev NFTs assigned to the zero address are considered invalid, and this
      *  function throws for queries about the zero address.
-     * @param _owner An address for whom to query the balance
+     * @param _owner - An address for whom to query the balance
      * @return The number of NFTs owned by `_owner`, possibly zero
      */
     function balanceOf(address _owner) external view returns (uint256 balance);
@@ -53,7 +53,7 @@ interface IERC1358NFT {
      * @notice Find the owner of an NFT
      * @dev NFTs assigned to zero address are considered invalid, and queries
      *  about them do throw.
-     * @param _tokenId The identifier for an NFT
+     * @param _tokenId - The identifier for an NFT
      * @return The address of the owner of the NFT
      */
     function ownerOf(uint256 _tokenId) external view returns (address owner);
@@ -63,15 +63,15 @@ interface IERC1358NFT {
      * @dev The zero address indicates there is no approved address.
      * @dev Throws unless `msg.sender` is the current NFT owner, or an authorized
      *  operator of the current owner.
-     * @param _approved The new approved NFT controller
-     * @param _tokenId The NFT to approve
+     * @param _approved - The new approved NFT controller
+     * @param _tokenId - The NFT to approve
      */
     function approve(address _approved, uint256 _tokenId) external;
     
     /**
      * @notice Get the approved address for a single NFT
      * @dev Throws if `_tokenId` is not a valid NFT
-     * @param _tokenId The NFT to find the approved address for
+     * @param _tokenId - The NFT to find the approved address for
      * @return The approved address for this NFT, or the zero address if there is none
      */
     function getApproved(uint256 _tokenId) external view returns (address operator);
@@ -81,8 +81,8 @@ interface IERC1358NFT {
      *  all of `msg.sender`'s assets.
      * @dev Emits the ApprovalForAll event. The contract MUST allow
      *  multiple operators per owner.
-     * @param _operator Address to add to the set of authorized operators.
-     * @param _approved True if the operator is approved, false to revoke approval
+     * @param _operator - Address to add to the set of authorized operators.
+     * @param _approved - True if the operator is approved, false to revoke approval
      */
     function setApprovalForAll(
         address _operator, 
@@ -91,8 +91,8 @@ interface IERC1358NFT {
     
     /**
      * @notice Query if an address is an authorized operator for another address
-     * @param _owner The address that owns the NFTs
-     * @param _operator The address that acts on behalf of the owner
+     * @param _owner - The address that owns the NFTs
+     * @param _operator - The address that acts on behalf of the owner
      * @return True if `_operator` is an approved operator for `_owner`, false otherwise
      */
     function isApprovedForAll(
@@ -111,9 +111,9 @@ interface IERC1358NFT {
      *  operator, or the approved address for this NFT. Throws if `_from` is
      *  not the current owner. Throws if `_to` is the zero address. Throws if
      *  `_tokenId` is not a valid NFT.
-     * @param _from The current owner of the NFT
-     * @param _to The new owner
-     * @param _tokenId The NFT to transfer
+     * @param _from - The current owner of the NFT
+     * @param _to - The new owner
+     * @param _tokenId - The NFT to transfer
      */
     function transferFrom(
         address _from, 
@@ -130,9 +130,9 @@ interface IERC1358NFT {
      *  checks if `_to` is a smart contract (code size > 0). If so, it calls
      *  `onERC721Received` on `_to` and throws if the return value is not
      *  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-     * @param _from The current owner of the NFT
-     * @param _to The new owner
-     * @param _tokenId The NFT to transfer
+     * @param _from - The current owner of the NFT
+     * @param _to - The new owner
+     * @param _tokenId - The NFT to transfer
      */
     function safeTransferFrom(
         address _from,
@@ -149,10 +149,10 @@ interface IERC1358NFT {
      *  checks if `_to` is a smart contract (code size > 0). If so, it calls
      *  `onERC721Received` on `_to` and throws if the return value is not
      *  `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-     * @param _from The current owner of the NFT
-     * @param _to The new owner
-     * @param _tokenId The NFT to transfer
-     * @param _data Additional data with no specified format, sent in call to `_to`
+     * @param _from - The current owner of the NFT
+     * @param _to - The new owner
+     * @param _tokenId - The NFT to transfer
+     * @param _data - Additional data with no specified format, sent in call to `_to`
      */
     function safeTransferFrom(
         address _from,

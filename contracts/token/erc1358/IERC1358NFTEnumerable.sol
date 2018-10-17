@@ -14,8 +14,8 @@ contract IERC1358NFTEnumerable is IERC1358NFT {
 
  	/**
  	 * @dev Returns owner of Non-Fungible token by it's index in array
- 	 * @param _owner Address of Non-Fungible Token owner
- 	 * @param _index Index of Non-Fungible Token in NFT array
+ 	 * @param _owner - Address of Non-Fungible Token owner
+ 	 * @param _index - Index of Non-Fungible Token in NFT array
  	 */
     function tokenOfOwnerByIndex(
         address _owner,
@@ -27,7 +27,7 @@ contract IERC1358NFTEnumerable is IERC1358NFT {
 
     /**
      * @dev Returns Non-Fungible Token unique identifier by it's index in array
-     * @param _index Index of NFT in array
+     * @param _index - Index of NFT in array
      */
     function tokenByIndex(uint256 _index) public view returns (uint256);
 }

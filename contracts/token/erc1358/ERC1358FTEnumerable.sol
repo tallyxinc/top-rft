@@ -6,13 +6,13 @@ import './ERC1358FT.sol';
 contract ERC1358FTEnumerable is ERC1358FT {
 
     // Total tokens supply 
-    uint256 internal _totalSupply;
+    uint256 internal totalSupply_;
 
     // Address of main NFT
-    address internal _nftAddress;
+    address internal nftAddress_;
 
     // tokenId of NFT, for which this FT is supplier
-    uint256 internal _initialTokenId;
+    uint256 internal initialTokenId_;
 
     // Mapping from address of token holer to its status
     mapping (address => bool) public tokenHolders;
@@ -22,74 +22,85 @@ contract ERC1358FTEnumerable is ERC1358FT {
 
     /**
      * @dev Constructor for ERC-1358FT contract with Enumerable extension
-     * @param totalSupply Max amount of tokens
-     * @param nftAddress Address of main NFT, by which this FT was created
-     * @param initialTokenId Unique identifier of NFT linked to this FT
-     * @param owner Address of FT token owner
+     * @param _totalSupply - Max amount of tokens
+     * @param _nftAddress - Address of main NFT, by which this FT was created
+     * @param _initialTokenId - Unique identifier of NFT linked to this FT
+     * @param _owner - Address of FT token owner
      */
     constructor (
-        uint256 totalSupply,
-        address nftAddress,
-        uint256 initialTokenId,
-        address owner
+        uint256 _totalSupply,
+        address _nftAddress,
+        uint256 _initialTokenId,
+        address _owner
     ) public {
-        require(totalSupply > 0);
-        require(nftAddress != address(0));
-        require(initialTokenId >= 0);
-        require(owner != address(0));
-        _totalSupply = totalSupply;
-        _nftAddress = nftAddress;
-        _initialTokenId = initialTokenId;
-        _balances[owner] = _totalSupply;
-        tokenHolders[owner] = true;
-        tokenHoldersRegistry.push(owner);
+        require(_totalSupply > 0);
+        require(_nftAddress != address(0));
+        require(_initialTokenId >= 0);
+        require(_owner != address(0));
+
+        totalSupply_ = _totalSupply;
+        nftAddress_ = _nftAddress;
+        initialTokenId_ = _initialTokenId;
+        _balances[_owner] = _totalSupply;
+        tokenHolders[_owner] = true;
+        tokenHoldersRegistry.push(_owner);
     }
 
     /**
-     * @dev Returns holders array size
+     * @dev Returns count of token holders
      */
-    function holdersRegistryLength() public view returns (uint256) {
+    function holdersCount() public view returns (uint256) {
         return tokenHoldersRegistry.length;
     }
 
     /** 
-     * @dev Returns address of holder by its index in holders array
-     * @param _index Index of holder in array
+     * @dev Returns address of token holder by index inside array
+     * of token holders
+     * @param _index - Index inside array of token holders
      */
-    function getTokenHolder(uint256 _index) public view returns (address) {
+    function holderByIndex(uint256 _index) public view returns (address) {
         return tokenHoldersRegistry[_index];
     }
 
     /**
-     * @dev Return array of token holders
-     */
-    function getTokenHolders() public view returns (address[]) {
-        return tokenHoldersRegistry;
+    * @dev Returns total supply of Fungible Token
+    */
+    function totalSupply() public view returns (uint256) {
+        return totalSupply_;
     }
 
     /**
-     * @dev Return array of token holders balances
+     * @dev Returns token holders addresses and their balances in some range
+     * @param _from - Start index inside array of token holders
+     * @param _to - End index inside array of token holders
      */
-    function getTokenHoldersBalances() public view returns (uint256[]) {
-        uint256[] memory holdersBalance = new uint256[](tokenHoldersRegistry.length);
+    function holders(
+        uint256 _from,
+        uint256 _to
+    ) 
+        public 
+        view 
+        returns (address[], uint256[]) 
+    {
+        require(
+            _from >= 0 &&
+            _to <= holdersCount()
+        );
 
-        for (uint256 i = 0; i < tokenHoldersRegistry.length; i++) {
+        address[] memory holdersAddresses = new address[](_to.sub(_from));
+        uint256[] memory holdersBalance = new uint256[](_to.sub(_from));
+    
+        for (uint256 i = _from; i < _to; i++) {
+            holdersAddresses[i] = tokenHoldersRegistry[i];
             holdersBalance[i] = balanceOf(tokenHoldersRegistry[i]);
         }
-        return holdersBalance;
+        return (holdersAddresses, holdersBalance);
     }
 
     /**
-     * @dev Return total token supply for this FT 
-     */
-    function totalSupply() public view returns (uint256) {
-        return _totalSupply;
-    }
-
-    /**
-     * @dev Returns NFT data for this FT, main NFT address and tokenId of dependent NFT 
+     * @dev Returns address of NFT contract and NFT id that was generated for FT
      */
     function getNFT() public view returns (address, uint256) {
-        return (_nftAddress, _initialTokenId);
+        return (nftAddress_, initialTokenId_);
     }
 }

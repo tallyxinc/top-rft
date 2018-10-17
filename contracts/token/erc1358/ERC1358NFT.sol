@@ -48,8 +48,9 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /**
-     * @dev Return NFT balance of specified address
-     * @param _owner Address of NFT holder
+     * @dev Returns NFT Token balance of selected address (_owner),
+     * which means, how many NFT tokens owner of address has on his balance.
+     * @param _owner - Address of NFT holder
      */
     function balanceOf(address _owner)
         public 
@@ -61,8 +62,8 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /** 
-     * @dev Return NFT owner by unique identifier
-     * @param _tokenId Unique identifier of NFT
+     * @dev Returns owner address of selected NFT token (_tokenId).
+     * @param _tokenId - Unique identifier of NFT
      */
     function ownerOf(uint256 _tokenId)
         public
@@ -75,9 +76,12 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /** 
-     * @dev Approves for operator managing of owner's NFT
-     * @param _to Operator for selected NFT
-     * @param _tokenId Unique identifier of NFT
+     * @dev Approves to transfer selected NFT (_tokenId) by specific address (_to).
+     * @notice Approving is needed when you want to give rights
+     * for some identified party to transfer your token.
+     * Approval event will be generated once approved.
+     * @param _to - Receiver address of transfer approve for selected NFT
+     * @param _tokenId - Unique identifier of NFT
      */
     function approve(
         address _to,
@@ -92,8 +96,10 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /**
-     * @dev Check approval operator address for specified NFT
-     * @param _tokenId Unique identifier of NFT
+     * @dev Returns address of approved for transfer address for selected NFT(_tokenId). 
+     * @notice Return approved address for NFT, if there is none 
+     * approved address for this NFT, it will return zero address
+     * @param _tokenId - Unique identifier of NFT
      */
     function getApproved(uint256 _tokenId) 
         public 
@@ -105,9 +111,12 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /** 
-     * @dev Set Approve status for operator all owner's NFTs
-     * @param _to Operator for selected NFT
-     * @param _approved Approval status
+     * @dev Approve/Disapprove(depends on _approved value) transfering of all 
+     * caller's NFTs by specific address (_to).
+     * @notice Needed in case you want to give rights to transfer
+     * of all your NFT's to some address
+     * @param _to - Receiver of approvals for all NFT's owned by caller address
+     * @param _approved - Approval status
      */
     function setApprovalForAll(
         address _to,
@@ -119,9 +128,12 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /**
-     * @dev Checks approval status for all owner's NFT's
-     * @param _owner Owner of NFT's
-     * @param _operator Operator for NFT's
+     * @dev Checks if all NFT's of certain address(_owner) is approved to transfer
+     * by another address(_operator)
+     * @notice Returns true in case it was called 
+     * setApprovalForAll(_operator, true), otherwise - false
+     * @param _owner - Address of NFT's owner
+     * @param _operator - Receipient address of transfer rights
      */
     function isApprovedForAll(
         address _owner,
@@ -131,10 +143,12 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /** 
-     * @dev Transfer NFT from owner to selected address
-     * @param _from Address of NFT sender
-     * @param _to Address of NFT receiver
-     * @param _tokenId Unique identifier of NFT
+     * @dev Transfer selected NFT (_tokenId) from owner (_from) to new owner(_to)
+     * @notice Transaction sender(msg.sender) should be owner or approved address by 
+     * approve or setApprovalForAll
+     * @param _from - Address of NFT's owner 
+     * @param _to - Address of NFT receiver
+     * @param _tokenId - Unique identifier of NFT
      */
     function transferFrom(
         address _from,
@@ -152,10 +166,15 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     }
 
     /**
-     * @dev Safe transfer from function, which checks and call transfer safely
-     * @param _from Address of NFT sender
-     * @param _to Address of NFT receiver
-     * @param _tokenId Unique identifier of NFT
+     * @dev Safe implementation of transferFrom function, which additionally checks
+     * that NFT receiver address is NFT compatible by calling method of Receipient
+     * contract address and supplying sender address, previous owner of NFT, NFT id
+     * @notice Safe transfer is being used instead of transferFrom, in case we need 
+     * to check that recipient address is compatible with NFT (only in case if 
+     * receipient address is contract) 
+     * @param _from - Address of NFT owner
+     * @param _to - Address of NFT receiver
+     * @param _tokenId - Unique identifier of NFT
      */
     function safeTransferFrom(
         address _from,
@@ -167,10 +186,10 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
 
     /**
      * @dev Extended safeTransferFrom function with bytes parameter
-     * @param _from Address of NFT sender
-     * @param _to Address of NFT receiver
-     * @param _tokenId Unique identifier of NFT
-     * @param _data Bytes additional transaction data
+     * @param _from - Address of NFT sender
+     * @param _to - Address of NFT receiver
+     * @param _tokenId - Unique identifier of NFT
+     * @param _data - Bytes additional transaction data
      */
     function safeTransferFrom(
         address _from,
@@ -184,7 +203,7 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
 
     /** 
      * @dev Checks existing of specified NFT by its tokenId (unique identifier)
-     * @param _tokenId Unique identifier of NFT
+     * @param _tokenId - Unique identifier of NFT
      */
     function _exists(uint256 _tokenId) 
         internal 
@@ -197,8 +216,8 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
 
     /** 
      * @dev Checks if transaction sender address if NFT owner or approved operator
-     * @param _operator Address of transaction sender
-     * @param _tokenId Unique identifier of NFT
+     * @param _operator - Address of transaction sender
+     * @param _tokenId - Unique identifier of NFT
      */
     function _isApprovedOrOwner(
         address _operator,
@@ -219,36 +238,44 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
 
     /**
      * @dev Internal mint function
-     * @param _to Address of NFT receiver
-     * @param _tokenId Unique identifier for new NFT
+     * @param _to - Address of NFT receiver
+     * @param _tokenId - Unique identifier for new NFT
      */
     function _mint(
         address _to, 
         uint256 _tokenId
-    ) internal {
+    ) 
+        internal 
+        returns (bool)
+    {
         require(_to != address(0));
         _addTokenTo(_to, _tokenId);
         emit Transfer(address(0), _to, _tokenId);
+        return true;
     } 
 
     /** 
      * @dev Internal burn function
-     * @param _owner Address of NFT holder
-     * @param _tokenId Unique identifier of NFT to burn
+     * @param _owner - Address of NFT holder
+     * @param _tokenId - Unique identifier of NFT to burn
      */
     function _burn(
         address _owner,
         uint256 _tokenId
-    ) internal {
+    ) 
+        internal 
+        returns (bool)
+    {
         _clearApproval(_owner, _tokenId);
         _removeTokenFrom(_owner, _tokenId);
         emit Transfer(_owner, address(0), _tokenId);
+        return true;
     }
 
     /** 
      * @dev Remove approved operator for selected NFT
-     * @param _owner Address of NFT owner
-     * @param _tokenId Unique identifier of NFT
+     * @param _owner - Address of NFT owner
+     * @param _tokenId - Unique identifier of NFT
      */
     function _clearApproval(
         address _owner,
@@ -262,8 +289,8 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
 
     /**
      * @dev Assigns ownership of selected NFT to specified address
-     * @param _to Address of NFT new owner
-     * @param _tokenId Unique identifier of NFT
+     * @param _to - Address of NFT new owner
+     * @param _tokenId - Unique identifier of NFT
      */
     function _addTokenTo(
         address _to,
@@ -276,8 +303,8 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
 
     /** 
      * @dev Removes ownership of selected NFT from specified address
-     * @param _from Address of NFT old owner 
-     * @param _tokenId Unique identifier of NFT
+     * @param _from - Address of NFT old owner 
+     * @param _tokenId - Unique identifier of NFT
      */
     function _removeTokenFrom(
         address _from,
@@ -290,10 +317,10 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
 
     /** 
      * @dev Checks that transfer call is safe
-     * @param _from Address of NFT sender
-     * @param _to Address of NFT receiver
-     * @param _tokenId Unique identifier of NFT
-     * @param _data Bytes transaction additional data
+     * @param _from - Address of NFT sender
+     * @param _to - Address of NFT receiver
+     * @param _tokenId - Unique identifier of NFT
+     * @param _data - Bytes transaction additional data
      */
     function _checkAndCallSafeTransfer(
         address _from,

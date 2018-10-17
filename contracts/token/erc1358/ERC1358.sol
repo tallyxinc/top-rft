@@ -3,208 +3,193 @@ pragma solidity ^0.4.24;
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol'; 
 import './ERC1358NFTFull.sol';
 import './ERC1358FTFull.sol';
+import './IERC1358.sol';
 
-contract ERC1358 is ERC1358NFTFull, Ownable {
+contract ERC1358 is IERC1358, ERC1358NFTFull, Ownable {
 
-    // Mapping from Non-Fungible Token unique identifier to Fungible Token address
+    // Mapping from Non-Fungible token id to address of Fungible Token 
     mapping (uint256 => address) public ftAddresses;
-    
-    // Mapping from address of token owner to Fungible Token address
-    mapping (address => address) public ftOwners;
 
-    // Mapping from Non-Fungible unique identifier to it's value in Fungible tokens
+    // Mapping from Non-Fungible token id to its value in equivalent of Fungible tokens
     mapping (uint256 => uint256) public nftValues;
-
-    // Mapping from Address to status 
-    mapping (address => bool) public changeAllowAgents;
-
-    // Array of all Fungible tokens
-    address[] public fungibleTokens;
 
     /**
      * @dev Constructor for ERC-1358 main contract
-     * @param name Name for a set of NFTs
-     * @param symbol Symbol for a set of NFTs
+     * @param _name - Name for a set of NFTs
+     * @param _symbol - Symbol for a set of NFTs
      */
-    constructor (
-        string name,
-        string symbol
+    constructor(
+        string _name,
+        string _symbol
     ) 
         public
-        ERC1358NFTFull(name, symbol) {} 
+        ERC1358NFTFull(_name, _symbol) 
+    {
 
-    /** 
-     * @dev Modifier that checks is msg.sender is contract owner or changeAllowAgents
+    } 
+
+    /**
+     * @dev Creates FT with specified parameters
+     * @param _name - Name for FT
+     * @param _symbol - Symbol for FT
+     * @param _decimals - Precision amount for FT
+     * @param _tokenOwner - Address of FT owner
+     * @param _fungibleTokenSupply - Max token supply for FT
+     * @param _tokenId - Unique identifier of NFT related to this FT
      */
-    modifier isChangeAllowedAgent() {
-        require(true == changeAllowAgents[msg.sender] || 
-            msg.sender == owner);
-         _;
+    function _createFT(
+        string _name,
+        string _symbol,
+        uint256 _decimals,
+        address _tokenOwner,
+        uint256 _fungibleTokenSupply,
+        uint256 _tokenId
+    ) 
+        internal 
+        returns (address)
+    {
+        require (_decimals > 0);
+        require (_tokenOwner != address(0));
+        require (_fungibleTokenSupply > 0);
+
+        ERC1358FTFull fungibleToken = new ERC1358FTFull(
+            _name,
+            _symbol,
+            _decimals,
+            _fungibleTokenSupply,
+            address(this),
+            _tokenId,
+            _tokenOwner
+        );
+
+        return address(fungibleToken);
     }
 
     /** 
-     * @dev Overrided mint function, mint NFT for specified address
-     * @param _to Address of NFT owner
-     * @param _tokenId Unique identifier of NFT
+     * @dev Mint NFT token and create FT accordingly
+     * @param _name - Name for FT
+     * @param _symbol - Symbol for FT
+     * @param _decimals - Precision amount for FT
+     * @param _tokenOwner - Address of FT owner
+     * @param _fungibleTokenSupply - Max token supply for FT
      */
     function mint(
-        address _to,
-        uint256 _tokenId
-    )   
+        string _name,
+        string _symbol,
+        uint256 _decimals,
+        address _tokenOwner,
+        uint256 _fungibleTokenSupply
+    ) 
         public
-        isChangeAllowedAgent
-        returns (bool)
+        returns (uint256)
     {
-        super._mint(_to, _tokenId);
-        return true;
+        uint256 tokenId = _allTokens.length;
+
+        address fungibleToken = _createFT(
+            _name, 
+            _symbol,
+            _decimals,
+            _tokenOwner,
+            _fungibleTokenSupply,
+            tokenId
+        );
+
+        require(super._mint(_tokenOwner, tokenId) == true);
+
+        ftAddresses[tokenId] = fungibleToken;
+        nftValues[tokenId] = _fungibleTokenSupply;
+
+        return tokenId;
     }
 
     /** 
-     * @dev Overrided burn function, burn NFT from specified address
-     * @param _owner Address from which NFT will be burned
-     * @param _tokenId Unique identifier of NFT
+     * @dev Burn NFT and delete FT data
+     * @param _owner - owner address of NFT to burn
+     * @param _tokenId - Unique identifier of NFT
      */
     function burn(
         address _owner,
         uint256 _tokenId
     ) 
         public
-        isChangeAllowedAgent
         returns (bool)
     {
-        super._burn(_owner, _tokenId);
+        require(super._burn(_owner, _tokenId) == true);
+        ftAddresses[_tokenId] = address(0);
+        nftValues[_tokenId] = 0;
         return true;
     }
 
-    /** 
-     * @dev Entry point to ERC1358 main flow, created NFT, which is supplid by FT
-     * @param name Name for FT
-     * @param symbol Symbol for FT
-     * @param decimals Precision amount for FT
-     * @param tokenOwner Address of FT owner
-     * @param fungibleTokenSupply Max token supply for FT
-     */
-    function createFungible(
-        string name,
-        string symbol,
-        uint256 decimals,
-        address tokenOwner,
-        uint256 fungibleTokenSupply
-    ) 
-        public 
-        onlyOwner 
-    {
-        require (decimals > 0);
-        require (tokenOwner != address(0));
-        require (fungibleTokenSupply > 0);
-
-        uint256 tokenId = _allTokens.length;
-
-        ERC1358FTFull fungibleToken = new ERC1358FTFull(
-            name,
-            symbol,
-            decimals,
-            fungibleTokenSupply,
-            address(this),
-            tokenId,
-            tokenOwner
-        );
-
-        fungibleTokens.push(fungibleToken);
-        changeAllowAgents[fungibleToken] = true;
-        ftAddresses[tokenId] = fungibleToken;
-        ftOwners[tokenOwner] = fungibleToken;
-        nftValues[tokenId] = fungibleTokenSupply;
-
-        require(mint(tokenOwner, tokenId) == true);
-    }
-
     /**
-     * @dev Function that updates value of NFT
-     * @param _tokenId Unique identifier of NFT
-     * @param _newValue New value for NFT
+     * @dev Returns value of selected NFT
+     * @param _tokenId - Unique identifier of NFT
      */
-    function updateNonFungibleValue(
-        uint256 _tokenId,
-        uint256 _newValue
-    ) 
-        public 
-        isChangeAllowedAgent()
-    {
-        require(nftValues[_tokenId] >= _newValue);
-        nftValues[_tokenId] = _newValue;
-    }
-
-    /**
-     * @dev Returns NFT value in equiv of FTs
-     * @param _tokenId unique identifier of NFT
-     */
-    function getNonFungibleValue(
+    function nftValue(
         uint256 _tokenId
     ) 
         public
         view 
-        returns (uint256 _value)
+        returns (uint256)
     {
-        _value = nftValues[_tokenId];
+        return nftValues[_tokenId];
     }
 
     /** 
-     * @dev Returns FT holder token balance
-     * @param _tokenId Unique identifier of NFT, which is supplied by FT
-     * @param _holder Address of FT holder
+     * @dev Returns FT token balance of specified NFT
+     * @param _holder - Holder address 
+     * @param _tokenId - Unique identifier of NFT
      */
-    function getFungibleTokenHolderBalance(
+    function ftHolderBalance(
         uint256 _tokenId,
         address _holder
     ) 
         public 
         view 
-        returns (uint256 _value) 
+        returns (uint256) 
     {
-        address fungibleTokenAddress = ftAddresses[_tokenId];
-        ERC1358FTFull fungibleToken = ERC1358FTFull(fungibleTokenAddress);
-        _value = fungibleToken.balanceOf(_holder);
-    }
-
-    /** 
-     * @dev Returns addresses array of all FT holders
-     * @param _tokenId Unique identifier of NFT, which is supplied by FT
-     */
-    function getFungibleTokenHolders(uint256 _tokenId) 
-        public
-        view 
-        returns (address[] _holders) 
-    {
-        address fungibleTokenAddress = ftAddresses[_tokenId];
-        ERC1358FTFull fungibleToken = ERC1358FTFull(fungibleTokenAddress);
-        _holders = fungibleToken.getTokenHolders();
-    } 
-
-    /**
-     * @dev Returns addresses and token balances array of all FT holders
-     * @param _tokenId Unique identifier of NFT, which is supplied by FT
-     */
-    function getFungibleTokenHolderBalances(uint256 _tokenId) 
-        public
-        view
-        returns (address[] _holders, uint256[] _balances) 
-    {
-        _holders = getFungibleTokenHolders(_tokenId);
-        address fungibleTokenAddress = ftAddresses[_tokenId];
-        ERC1358FTFull fungibleToken = ERC1358FTFull(fungibleTokenAddress);
-        _balances = fungibleToken.getTokenHoldersBalances();
+        return ERC1358FTFull(ftAddresses[_tokenId]).balanceOf(_holder);
     }
 
     /**
-     * @dev Returns address of FT by id of NFT it linked to
-     * @param _tokenId Unique identifier of NFT, which is supplied by FT
+     * @dev Returns all FT token holders and their balances of specified NFT
+     * @param _tokenId - Unique identifier of NFT
+     * @param _indexFrom - Start index inside array of token holders
+     * @param _indexTo - End index inside array of token holders
      */
-    function getFungibleTokenAddress(uint256 _tokenId)
+    function ftHoldersBalances(
+        uint256 _tokenId,
+        uint256 _indexFrom,
+        uint256 _indexTo
+    ) 
         public
         view
-        returns (ERC1358FTFull _erc20CompatibleInterface) 
+        returns (address[], uint256[]) 
     {
-        return ERC1358FTFull(ftAddresses[_tokenId]);
+        return ERC1358FTFull(ftAddresses[_tokenId])
+            .holders(_indexFrom, _indexTo);
+    }
+
+    /**
+     * @dev Returns FT token holders amount of specified NFT
+     * @param _tokenId - Unique identifier of NFT
+     */
+    function ftHoldersCount(uint256 _tokenId)
+        public
+        view
+        returns (uint256)
+    {
+        return ERC1358FTFull(ftAddresses[_tokenId]).holdersCount();
+    }
+
+    /**
+     * @dev Returns FT smart contract address of specified NFT
+     * @param _tokenId - Unique identifier of NFT
+     */
+    function ftAddress(uint256 _tokenId)
+        public
+        view
+        returns (address _ftAddress) 
+    {
+        return ftAddresses[_tokenId];
     } 
 }

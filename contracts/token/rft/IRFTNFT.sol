@@ -1,10 +1,10 @@
 pragma solidity 0.4.24;
 
 /**
- * @title ERC-1358 Non-Fungible Token interface, that is supplied with Fungible Token
+ * @title RFT Non-Fungible Token interface, that is supplied with Fungible Token
  * @notice Non-Fungible Token interface
  */
-interface IERC1358NFT {
+interface IRFTNFT {
     /**
      * @dev This emits when ownership of any NFT changes by any mechanism.
      *  This event emits when NFTs are created (`from` == 0) and destroyed

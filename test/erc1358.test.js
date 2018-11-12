@@ -1,25 +1,25 @@
-const ERC1358 = artifacts.require('token/ERC1358');
+const RFT = artifacts.require('token/RFT');
 const abi = require('ethereumjs-abi');
 const BigNumber = require('bignumber.js');
 const Utils = require('./utils');
 
 let precision = new BigNumber("1000000000000000000");
 
-contract('ERC1358', accounts => {
+contract('RFT', accounts => {
 	
-	let erc1358, ft1Address;
+	let rft, ft1Address;
 	let owner = accounts[0];
 	let name = "tallyx_0";
 	let symbol = "topp";
 
 	beforeEach(async () => {
-		erc1358 = await ERC1358.new(name, symbol, {from: owner});
+		rft = await RFT.new(name, symbol, {from: owner});
 	});
 
 	it('should check metadata', async () => {
-		const _name = await erc1358.name();
+		const _name = await rft.name();
 		assert.equal(_name, name, "name is not equal");
-		const _symbol = await erc1358.symbol();
+		const _symbol = await rft.symbol();
 		assert.equal(_symbol, symbol, "symbol is not equal");
 	});
 
@@ -30,7 +30,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = accounts[1];
 		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
 		
-		await erc1358.mint(
+		await rft.mint(
 			name,
 			symbol,
 			decimals,
@@ -49,7 +49,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = 0;
 		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
 		
-		await erc1358.mint(
+		await rft.mint(
 			name,
 			symbol,
 			decimals,
@@ -68,7 +68,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = accounts[1];
 		let fungibleTokenSupply = new BigNumber('0').mul(precision);
 		
-		await erc1358.mint(
+		await rft.mint(
 			name,
 			symbol,
 			decimals,
@@ -87,7 +87,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = accounts[1];
 		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
 		
-		await erc1358.mint(
+		await rft.mint(
 			name,
 			symbol,
 			decimals,
@@ -96,11 +96,11 @@ contract('ERC1358', accounts => {
 			{from: owner}
 		).then(Utils.receiptShouldSucceed);
 
-		let ftAddress = await erc1358.ftAddresses.call(new BigNumber('0'));
+		let ftAddress = await rft.ftAddresses.call(new BigNumber('0'));
 		console.log('Fungible token address: ' + ftAddress);
 		ft1Address = ftAddress;
 
-		let nftValue = await erc1358.nftValues.call(new BigNumber('0'));
+		let nftValue = await rft.nftValues.call(new BigNumber('0'));
 		assert.equal(new BigNumber(nftValue).valueOf(), fungibleTokenSupply.valueOf(), "nftValue is not equal");
 	});
 
@@ -111,7 +111,7 @@ contract('ERC1358', accounts => {
 		let tokenOwner = accounts[1];
 		let fungibleTokenSupply = new BigNumber('1000').mul(precision);
 		
-		await erc1358.mint(
+		await rft.mint(
 			name,
 			symbol,
 			decimals,
@@ -120,20 +120,20 @@ contract('ERC1358', accounts => {
 			{from: owner}
 		).then(Utils.receiptShouldSucceed);
 
-		let ftAddress = await erc1358.ftAddresses.call(new BigNumber('0'));
+		let ftAddress = await rft.ftAddresses.call(new BigNumber('0'));
 		console.log('Fungible token address: ' + ftAddress);
 		ft1Address = ftAddress;
 
-		let nftValue = await erc1358.nftValues.call(new BigNumber('0'));
+		let nftValue = await rft.nftValues.call(new BigNumber('0'));
 		assert.equal(new BigNumber(nftValue).valueOf(), fungibleTokenSupply.valueOf(), "nftValue is not equal");
 
-		await erc1358.burn(tokenOwner, new BigNumber('0'))
+		await rft.burn(tokenOwner, new BigNumber('0'))
 			.then(Utils.receiptShouldSucceed);
 
-		ftAddress = await erc1358.ftAddresses.call(new BigNumber('0'));
+		ftAddress = await rft.ftAddresses.call(new BigNumber('0'));
 		assert.equal(ftAddress, 0x0, "address is not equal");
 
-		nftValue = await erc1358.nftValue.call(new BigNumber('0'));
+		nftValue = await rft.nftValue.call(new BigNumber('0'));
 		assert.equal(nftValue, 0, "nftValue is not equal");
 	});
 
@@ -153,7 +153,7 @@ contract('ERC1358', accounts => {
 			let fungibleTokenSupply_1 = new BigNumber('1000').mul(precision);
 			let fungibleTokenSupply_2 = new BigNumber('500').mul(precision);
 		
-			await erc1358.mint(
+			await rft.mint(
 				name_1,
 				symbol_1,
 				decimals,
@@ -161,9 +161,9 @@ contract('ERC1358', accounts => {
 				fungibleTokenSupply_1,
 				{from: owner}
 			).then(Utils.receiptShouldSucceed);
-			firstFungible = await erc1358.ftAddresses.call(0);
+			firstFungible = await rft.ftAddresses.call(0);
 
-			await erc1358.mint(
+			await rft.mint(
 				name_2,
 				symbol_2,
 				decimals,
@@ -171,14 +171,14 @@ contract('ERC1358', accounts => {
 				fungibleTokenSupply_2,
 				{from: owner}
 			).then(Utils.receiptShouldSucceed);
-			secondFungible = await erc1358.ftAddresses.call(1);
+			secondFungible = await rft.ftAddresses.call(1);
 		});
 
 		it('should check nftValue', async () => {
 			let tokenId = 0;
 			let value = new BigNumber('1000').mul(precision);
 
-			let nftValue = await erc1358.nftValue(tokenId);
+			let nftValue = await rft.nftValue(tokenId);
 			assert.equal(new BigNumber(nftValue).valueOf(), value, "nftValue is not equal");
 		});
 
@@ -188,10 +188,10 @@ contract('ERC1358', accounts => {
 			let holder = accounts[1];
 			let holderSecond = accounts[2];
 
-			let balanceOfHolder = await erc1358.ftHolderBalance(tokenId, holder);
+			let balanceOfHolder = await rft.ftHolderBalance(tokenId, holder);
 			assert.equal(new BigNumber(balanceOfHolder).valueOf(), new BigNumber('1000').mul(precision).valueOf(), "balanceOfHolder is not equal");
 
-			balanceOfHolder = await erc1358.ftHolderBalance(tokenIdSecond, holderSecond);
+			balanceOfHolder = await rft.ftHolderBalance(tokenIdSecond, holderSecond);
 			assert.equal(new BigNumber(balanceOfHolder).valueOf(), new BigNumber('500').mul(precision).valueOf(), "balanceOfHolder is not equal");
 		});
 
@@ -199,14 +199,14 @@ contract('ERC1358', accounts => {
 			let tokenId = 0;
 			let tokenIdSecond = 1;
 
-			let tokenHoldersAndBalances = await erc1358.ftHoldersBalances(tokenId, 0, 1);
+			let tokenHoldersAndBalances = await rft.ftHoldersBalances(tokenId, 0, 1);
 			let holders = tokenHoldersAndBalances[0];
 			let balances = tokenHoldersAndBalances[1];
 
 			assert.equal(holders[0], accounts[1], "holders is not equal");
 			assert.equal(new BigNumber(balances[0]).valueOf(), new BigNumber('1000').mul(precision).valueOf(), "balances is not equal");
 
-			tokenHoldersAndBalances = await erc1358.ftHoldersBalances(tokenIdSecond, 0, 1);
+			tokenHoldersAndBalances = await rft.ftHoldersBalances(tokenIdSecond, 0, 1);
 			holders = tokenHoldersAndBalances[0];
 			balances = tokenHoldersAndBalances[1];
 
@@ -214,7 +214,7 @@ contract('ERC1358', accounts => {
 			assert.equal(new BigNumber(balances[0]), new BigNumber('500').mul(precision).valueOf(), "balances is not equal");
 
 			// cause _indexTo is bigger than holders count
-			await erc1358.ftHoldersBalances(tokenId, 0, 2)
+			await rft.ftHoldersBalances(tokenId, 0, 2)
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 		});
@@ -223,10 +223,10 @@ contract('ERC1358', accounts => {
 			let tokenId = 0;
 			let tokenIdSecond = 1;
 
-			let firstTokenHoldersCount = await erc1358.ftHoldersCount(tokenId);
+			let firstTokenHoldersCount = await rft.ftHoldersCount(tokenId);
 			assert.equal(new BigNumber(firstTokenHoldersCount).valueOf(), 1, "holders count is not equal");
 
-			let secondTokenHoldersCount = await erc1358.ftHoldersCount(tokenIdSecond);
+			let secondTokenHoldersCount = await rft.ftHoldersCount(tokenIdSecond);
 			assert.equal(new BigNumber(secondTokenHoldersCount).valueOf(), 1, "holders count is not equal");
 		});
 
@@ -234,10 +234,10 @@ contract('ERC1358', accounts => {
 			let tokenId = 0;
 			let tokenIdSecond = 1;
 
-			let firstFungibleAddress = await erc1358.ftAddress(tokenId);
+			let firstFungibleAddress = await rft.ftAddress(tokenId);
 			assert.equal(firstFungibleAddress, firstFungible, "fungibleToken address is not equal");
 
-			let secondFungibleAddress = await erc1358.ftAddress(tokenIdSecond);
+			let secondFungibleAddress = await rft.ftAddress(tokenIdSecond);
 			assert.equal(secondFungibleAddress, secondFungible, "fungibleToken address is not equal");
 		})
 	});
@@ -253,7 +253,7 @@ contract('ERC1358', accounts => {
 		let fungible;
 
 		beforeEach(async () => {
-			await erc1358.mint(
+			await rft.mint(
 				name,
 				symbol,
 				decimals,
@@ -261,51 +261,51 @@ contract('ERC1358', accounts => {
 				fungibleTokenSupply,
 				{from: owner}
 			).then(Utils.receiptShouldSucceed);
-			fungible = await erc1358.ftAddresses.call(0);
+			fungible = await rft.ftAddresses.call(0);
 		})
 
 		it('should check balanceOf', async () => {
-			let balance = await erc1358.balanceOf(tokenOwner);
+			let balance = await rft.balanceOf(tokenOwner);
 			assert.equal(new BigNumber(balance).valueOf(), 1, "balance is not equal");
 		});
 
 		it('should check ownerOf', async () => {
 			let receiver = accounts[2]
-			let ownerOfNFT = await erc1358.ownerOf(tokenId);
+			let ownerOfNFT = await rft.ownerOf(tokenId);
 			assert.equal(ownerOfNFT, tokenOwner, "ownerOfNFT is not equal");
 		
-			await erc1358.transferFrom(
+			await rft.transferFrom(
 				tokenOwner,
 				receiver,
 				tokenId,
 				{from: tokenOwner}
 			);
 
-			ownerOfNFT = await erc1358.ownerOf(tokenId);
+			ownerOfNFT = await rft.ownerOf(tokenId);
 			assert.equal(ownerOfNFT, receiver, "ownerOfNFT is not equal");
 		});
 
 		it('should check approve and getApproved', async () => {
 			let approvalAddress = accounts[3];
 
-			await erc1358.approve(approvalAddress, tokenId, {from: tokenOwner})
+			await rft.approve(approvalAddress, tokenId, {from: tokenOwner})
 				.then(Utils.receiptShouldSucceed);
 
-			let checkApproval = await erc1358.getApproved(tokenId);
+			let checkApproval = await rft.getApproved(tokenId);
 			assert.equal(checkApproval, approvalAddress, "approval address is not equal");
 		});
 
 		it('should check setApprovalForAll and isApprovedForAll', async () => {
 			let approvalAddress = accounts[3];
 
-			await erc1358.setApprovalForAll(tokenOwner, true, {from: tokenOwner})
+			await rft.setApprovalForAll(tokenOwner, true, {from: tokenOwner})
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.setApprovalForAll(approvalAddress, true, {from: tokenOwner})
+			await rft.setApprovalForAll(approvalAddress, true, {from: tokenOwner})
 				.then(Utils.receiptShouldSucceed);
 
-			let isApproved = await erc1358.isApprovedForAll(tokenOwner, approvalAddress);
+			let isApproved = await rft.isApprovedForAll(tokenOwner, approvalAddress);
 			assert.equal(isApproved, true, "isApprovedForAll is not equal");
 		});
 
@@ -313,25 +313,25 @@ contract('ERC1358', accounts => {
 			let approvalAddress = accounts[3];
 			let receiver = accounts[4];
 
-			await erc1358.transferFrom(tokenOwner, receiver, tokenId)
+			await rft.transferFrom(tokenOwner, receiver, tokenId)
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.approve(approvalAddress, tokenId, {from: tokenOwner})
+			await rft.approve(approvalAddress, tokenId, {from: tokenOwner})
 				.then(Utils.receiptShouldSucceed);
 
-			await erc1358.transferFrom(tokenOwner, approvalAddress, tokenId)
+			await rft.transferFrom(tokenOwner, approvalAddress, tokenId)
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.transferFrom(tokenOwner, approvalAddress, tokenId, {from: accounts[2]})
+			await rft.transferFrom(tokenOwner, approvalAddress, tokenId, {from: accounts[2]})
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.transferFrom(tokenOwner, receiver, tokenId, {from: approvalAddress})
+			await rft.transferFrom(tokenOwner, receiver, tokenId, {from: approvalAddress})
 				.then(Utils.receiptShouldSucceed);
 
-			let balanceOf = await erc1358.balanceOf(receiver);
+			let balanceOf = await rft.balanceOf(receiver);
 			assert.equal(new BigNumber(balanceOf).valueOf(), 1, "balanceOf is not equal");
 		});
 
@@ -339,30 +339,30 @@ contract('ERC1358', accounts => {
 			let approvalAddress = accounts[3];
 			let receiver = accounts[4];
 
-			await erc1358.safeTransferFrom(tokenOwner, receiver, tokenId)
+			await rft.safeTransferFrom(tokenOwner, receiver, tokenId)
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.approve(approvalAddress, tokenId, {from: tokenOwner})
+			await rft.approve(approvalAddress, tokenId, {from: tokenOwner})
 				.then(Utils.receiptShouldSucceed);
 
-			await erc1358.safeTransferFrom(tokenOwner, approvalAddress, tokenId)
+			await rft.safeTransferFrom(tokenOwner, approvalAddress, tokenId)
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.safeTransferFrom(tokenOwner, approvalAddress, tokenId, {from: accounts[2]})
+			await rft.safeTransferFrom(tokenOwner, approvalAddress, tokenId, {from: accounts[2]})
 				.then(Utils.receiptShouldFailed)
 				.catch(Utils.catchReceiptShouldFailed);
 
-			await erc1358.safeTransferFrom(tokenOwner, receiver, tokenId, {from: approvalAddress})
+			await rft.safeTransferFrom(tokenOwner, receiver, tokenId, {from: approvalAddress})
 				.then(Utils.receiptShouldSucceed);
 
-			let balanceOf = await erc1358.balanceOf(receiver);
+			let balanceOf = await rft.balanceOf(receiver);
 			assert.equal(new BigNumber(balanceOf).valueOf(), 1, "balanceOf is not equal");
 		});
 
 		it('should check tokenURI', async () => {
-			let uri = await erc1358.tokenURI(tokenId);
+			let uri = await rft.tokenURI(tokenId);
 			assert.equal(uri, "", "uri is not equal");
 		});
 	});

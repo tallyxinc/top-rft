@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import './IERC1358FTEnumerable.sol';
-import './ERC1358FT.sol';
+import './IRFTFTEnumerable.sol';
+import './RFTFT.sol';
 
-contract ERC1358FTEnumerable is ERC1358FT {
+contract RFTFTEnumerable is RFTFT {
 
     // Total tokens supply 
     uint256 internal totalSupply_;
@@ -21,7 +21,7 @@ contract ERC1358FTEnumerable is ERC1358FT {
     address[] public tokenHoldersRegistry;
 
     /**
-     * @dev Constructor for ERC-1358FT contract with Enumerable extension
+     * @dev Constructor for RFTFT contract with Enumerable extension
      * @param _totalSupply - Max amount of tokens
      * @param _nftAddress - Address of main NFT, by which this FT was created
      * @param _initialTokenId - Unique identifier of NFT linked to this FT

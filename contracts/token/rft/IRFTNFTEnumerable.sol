@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
-import "./IERC1358NFT.sol";
+import "./IRFTNFT.sol";
 
 /**
- * @title ERC-1358 Non-Fungible Token interface, that is supplied with Fungible Token
+ * @title RFT Non-Fungible Token interface, that is supplied with Fungible Token
  * @notice Optional Enumerable interface for Non-Fungible Token
  */
-contract IERC1358NFTEnumerable is IERC1358NFT {
+contract IRFTNFTEnumerable is IRFTNFT {
 	/**
 	 * @dev Returns total capacity of current NFT series
 	 */

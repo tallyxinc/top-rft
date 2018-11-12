@@ -1,10 +1,10 @@
 pragma solidity 0.4.24;
 
 /**
- * @title ERC-1358 Fungible Token interface (ERC-20 compatible)
+ * @title RFT Fungible Token interface (ERC-20 compatible)
  * @notice ERC-20 Token compatible interface
  */
-interface IERC1358FT {
+interface IRFTFT {
     /**
      * @dev This emits when Fungible Token is being transfered
      * This event emits when Fungible Token is transfered to specified address,

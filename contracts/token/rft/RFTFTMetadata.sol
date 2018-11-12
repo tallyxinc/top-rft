@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import './ERC1358FT.sol';
+import './RFTFT.sol';
 
-contract ERC1358FTMetadata is ERC1358FT {
+contract RFTFTMetadata is RFTFT {
     // Name for FT (notice: Name is not unique)
     string internal name_;
     // Symbol for FT (notice: Symbol is abbreviated from name and is not unique to)
@@ -11,7 +11,7 @@ contract ERC1358FTMetadata is ERC1358FT {
     uint256 internal decimals_;
 
     /**
-     * @dev Constructor for ERC-1358 contract with Metadata extension
+     * @dev Constructor for RFT contract with Metadata extension
      * @param _name - Name for FT
      * @param _symbol - Symbol for FT
      * @param _decimals - Precision for FT

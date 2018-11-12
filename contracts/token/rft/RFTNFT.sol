@@ -3,17 +3,17 @@ pragma solidity ^0.4.24;
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 import 'openzeppelin-solidity/contracts/AddressUtils.sol';
 import 'openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol';
-import './IERC1358NFT.sol';
-import './IERC1358NFTReceiver.sol';
+import './IRFTNFT.sol';
+import './IRFTNFTReceiver.sol';
 
 
-contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
+contract RFTNFT is SupportsInterfaceWithLookup, IRFTNFT {
     using SafeMath for uint256;
     using AddressUtils for address;
 
-    // Equals to `bytes4(keccak256("onERC1358Received(address,address,uint256,bytes)"))`
-    // which can be also obtained as `IERC1358NFTReceiver(0).onERC1358Received.selector`
-    bytes4 private constant _ERC1358NFT_RECEIVED = 0x150b7a02;
+    // Equals to `bytes4(keccak256("onRFTReceived(address,address,uint256,bytes)"))`
+    // which can be also obtained as `IRFTNFTReceiver(0).onRFTReceived.selector`
+    bytes4 private constant _RFTNFT_RECEIVED = 0x150b7a02;
 
     // Mapping from Non-Fungible Token unique identifier (id) to owner address
     mapping (uint256 => address) internal _tokenOwner;
@@ -27,7 +27,7 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
     // Mapping from owner address to approved operator address
     mapping (address => mapping (address => bool)) private _operatorApprovals;
 
-    bytes4 private constant _InterfaceId_ERC1358NFT = 0x80ac58cd;
+    bytes4 private constant _InterfaceId_RFTNFT = 0x80ac58cd;
     /*
      * 0x80ac58cd ===
      *   bytes4(keccak256('balanceOf(address)')) ^
@@ -41,10 +41,10 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
      */
 
     /**
-     * @dev Constructor for ERC-1358 contract
+     * @dev Constructor for RFT contract
      */
     constructor() public {
-        _registerInterface(_InterfaceId_ERC1358NFT);
+        _registerInterface(_InterfaceId_RFTNFT);
     }
 
     /**
@@ -334,9 +334,9 @@ contract ERC1358NFT is SupportsInterfaceWithLookup, IERC1358NFT {
         if (!_to.isContract()) {
             return true;
         }
-        bytes4 retval = IERC1358NFTReceiver(_to).onERC1358Received(
+        bytes4 retval = IRFTNFTReceiver(_to).onRFTReceived(
             msg.sender, _from, _tokenId, _data
         );
-        return (retval == _ERC1358NFT_RECEIVED);
+        return (retval == _RFTNFT_RECEIVED);
     }
 }

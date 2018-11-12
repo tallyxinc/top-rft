@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import './IERC1358FT.sol';
+import './IRFTFT.sol';
 
-contract ERC1358FT is IERC1358FT {
+contract RFTFT is IRFTFT {
     using SafeMath for uint256;
 
     // Mapping of Fungible Token holder balances

@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
 import 'openzeppelin-solidity/contracts/introspection/ERC165.sol';
-import './ERC1358NFT.sol';
+import './RFTNFT.sol';
 
-contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
+contract RFTNFTMetadata is ERC165, RFTNFT {
 
     // Name for a set of Non-Fungible tokens
     string internal name_;
@@ -14,8 +14,8 @@ contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
     // Registry of token Uniform Resource Identifiers
     mapping (uint256 => string) private _tokenURIs;
 
-    // Identefier of ERC-1358 NFT Metadata contract interface
-    bytes4 private constant InterfaceId_ERC1358NFTMetadata = 0x5b5e139f;
+    // Identefier of RFT NFT Metadata contract interface
+    bytes4 private constant InterfaceId_RFTNFTMetadata = 0x5b5e139f;
     /**
      * 0x5b5e139f ===
      *   bytes4(keccak256('name()')) ^
@@ -24,7 +24,7 @@ contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
      */
 
     /**
-     * @dev Constructor for ERC-1358 contract extended with metadata
+     * @dev Constructor for RFT contract extended with metadata
      * @param _name - Name for a set of NFTs
      * @param _symbol - Symbol for a set of NFTs
      */
@@ -37,14 +37,14 @@ contract ERC1358NFTMetadata is ERC165, ERC1358NFT {
     }
 
     /**
-     * @dev Getter for ERC-1358 name
+     * @dev Getter for RFT name
      */
     function name() external view returns (string) {
         return name_;
     }
 
     /**
-     * @dev Getter for ERC-1358 symbol
+     * @dev Getter for RFT symbol
      */
     function symbol() external view returns (string) {
         return symbol_;

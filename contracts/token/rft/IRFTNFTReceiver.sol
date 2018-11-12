@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-interface IERC1358NFTReceiver {
+interface IRFTNFTReceiver {
     /**
      * Note: the NFT main contract address is always the message sender (msg.sender)
      * @param _operator - Address who called 'transferFrom' function
@@ -10,7 +10,7 @@ interface IERC1358NFTReceiver {
      * @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
      * unless throwing
      */
-    function onERC1358Received(
+    function onRFTReceived(
         address _operator, 
         address _from, 
         uint256 _tokenId, 

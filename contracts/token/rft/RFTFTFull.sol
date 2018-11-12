@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import './ERC1358FT.sol';
-import './ERC1358.sol';
-import './ERC1358FTMetadata.sol';
-import './ERC1358FTEnumerable.sol';
+import './RFTFT.sol';
+import './RFT.sol';
+import './RFTFTMetadata.sol';
+import './RFTFTEnumerable.sol';
 
-contract ERC1358FTFull is ERC1358FT, ERC1358FTMetadata, ERC1358FTEnumerable {
+contract RFTFTFull is RFTFT, RFTFTMetadata, RFTFTEnumerable {
     /**
-     * @dev Constructor for ERC1358FT full implementation contract
+     * @dev Constructor for RFTFT full implementation contract
      * @param _name - Name for FT
      * @param _symbol - Symbol for FT
      * @param _decimals - Precision amount for FT
@@ -26,12 +26,12 @@ contract ERC1358FTFull is ERC1358FT, ERC1358FTMetadata, ERC1358FTEnumerable {
         address _owner
 	)
 		public 
-		ERC1358FTMetadata(
+		RFTFTMetadata(
 			_name,
 			_symbol,
 			_decimals
 		)
-		ERC1358FTEnumerable(
+		RFTFTEnumerable(
 			_totalSupply,
 			_nftAddress,
 			_initialTokenId,

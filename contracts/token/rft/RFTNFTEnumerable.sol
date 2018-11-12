@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
 import 'openzeppelin-solidity/contracts/introspection/ERC165.sol';
-import './ERC1358NFT.sol';
+import './RFTNFT.sol';
 
-contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
+contract RFTNFTEnumerable is ERC165, RFTNFT {
 
 	// Mapping from Address of NFT holder to a set of his NFTs
 	mapping (address => uint256[]) internal _ownedTokens;
@@ -17,14 +17,14 @@ contract ERC1358NFTEnumerable is ERC165, ERC1358NFT {
 	// Mapping from NFT unique identifiers to their position in array
 	mapping (uint256 => uint256) internal _allTokensIndex;
 
-	// InterfaceId for ERC-1358 Enumerable contract
-	bytes4 private constant _InterfaceId_ERC1358NFTEnumerable = 0x780e9d63;
+	// InterfaceId for RFT Enumerable contract
+	bytes4 private constant _InterfaceId_RFTNFTEnumerable = 0x780e9d63;
 
 	/**
-	 * @dev Constructor for ERC-1358 NFT Enumarable contract
+	 * @dev Constructor for RFT NFT Enumarable contract
 	 */
 	constructor() public {
-		_registerInterface(_InterfaceId_ERC1358NFTEnumerable);
+		_registerInterface(_InterfaceId_RFTNFTEnumerable);
 	}
 
 	/**

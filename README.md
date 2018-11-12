@@ -1,10 +1,10 @@
-# ERC-1358
+# RFT
 ## Overview
-New approach for Token Standards was created taking all best features of ERC 721, combined with ERC 20 compatible interface, gives a lot of opportunities for business. Due to ERC 721 token nature it brings non-fungibility and now it is supplied by ERC 20’s, in respect of that, your stake in ERC 20's tokens define your portion for non-fungible token, which could be presented like unique crypto asset, as example you could build shareholding or collaborative trading over of ERC 1358 NFT.
+New approach for Token Standards was created taking all best features of ERC 721, combined with ERC 20 compatible interface, gives a lot of opportunities for business. Due to ERC 721 token nature it brings non-fungibility and now it is supplied by ERC 20’s, in respect of that, your stake in ERC 20's tokens define your portion for non-fungible token, which could be presented like unique crypto asset, as example you could build shareholding or collaborative trading over of RFT NFT.
 
 ## Internal process
 
-This standard outlines a smart contract interface, which allow creating a Non-Fungible assets, each of them is supplied by Fungible Token in a separate contract, with ERC-20 compatibility. Existing standards such as ERC-721 cannot provide enough features and functionality in order to be supplied by another asset. The ERC-721 standard’s Token ID is a single non-fungible unique identifier (index) and the set of such NF’s is deployed as a single contract with settings for the entire collection. Unlike, the ERC-1358 Non-Fungible ERC-20 Compatible Token allows to create Fungible Token with predefined token supply, that will be valued conformity for a set of Non-Fungible tokens.
+This standard outlines a smart contract interface, which allow creating a Non-Fungible assets, each of them is supplied by Fungible Token in a separate contract, with ERC-20 compatibility. Existing standards such as ERC-721 cannot provide enough features and functionality in order to be supplied by another asset. The ERC-721 standard’s Token ID is a single non-fungible unique identifier (index) and the set of such NF’s is deployed as a single contract with settings for the entire collection. Unlike, the RFT Non-Fungible ERC-20 Compatible Token allows to create Fungible Token with predefined token supply, that will be valued conformity for a set of Non-Fungible tokens.
 
 The entry point to the pipeline of creating Non-Fungible Token, which value is supplied by Fungible once with ERC-20 compatibility starts from ‘mint’ function. Under the hood ‘mint’ creates the Fungible token with specified owner and supply and then establish Non-Fungible one, both tokens are linked between each other. By granting binding between NFT and FT we gain an opportunity to create a set of NFT’s, with different owners, the balance of Fungible Token for each holder in relative to NFT determines the measure of his possessions to a Non-Fungible asset.
 
@@ -14,11 +14,11 @@ The entry point to the pipeline of creating Non-Fungible Token, which value is s
 - symbol
 - decimals
 - total supply
-- address of ERC-1358 NFT
+- address of RFT NFT
 - address of owner
 - NFT token id
 
-Name,  symbol, decimals and total supply are integral local variables of ERC-20 compatible interface. Address of ERC-1358 NFT is an address of NFT base contract, which initializes TGE of FT contract. NFT token id is a unique identifier of NFT, which is related to this FT.
+Name,  symbol, decimals and total supply are integral local variables of ERC-20 compatible interface. Address of RFT NFT is an address of NFT base contract, which initializes TGE of FT contract. NFT token id is a unique identifier of NFT, which is related to this FT.
 
 
 **Non-Fungble token requires:**
@@ -34,7 +34,7 @@ Token id is a unique identifier for NFT, an owner is address to whom belongs NFT
 
 ## Functions
 
-### ERC1358 NFT
+### RFT NFT
 
 1.  **balanceOf(address _owner)**
 Returns NFT Token balance of selected address (_owner), which means, how many NFT tokens owner of address has on his balance. 
@@ -107,7 +107,7 @@ _tokenId - unique identifier of NFT.
 **Return value:** string
 **Sample return value:** "TOKI1"
 
-### ERC1358 FT
+### RFT FT
 
 1.  **balanceOf(address _address)**
 Returns fungible token balance of specific address.

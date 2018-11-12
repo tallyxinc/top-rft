@@ -1,14 +1,14 @@
 pragma solidity ^0.4.24;
 
-import './IERC1358FT.sol';
+import './IRFTFT.sol';
 
 /**
- * @title ERC-1358 Fungible Token interface (ERC-20 compatible)
+ * @title RFT Fungible Token interface (ERC-20 compatible)
  * @notice Optional enumerable interface for ERC-20 compatible Token
  */
-contract IERC1358FTEnumerable is IERC1358FT {
+contract IRFTFTEnumerable is IRFTFT {
 	/**
-	 * @notice Returns total token supply of ERC-1358 Fungible Token (ERC-20 compatible)
+	 * @notice Returns total token supply of RFT Fungible Token (ERC-20 compatible)
 	 */
 	function totalSupply() public view returns (uint256 _totalSupply);
 

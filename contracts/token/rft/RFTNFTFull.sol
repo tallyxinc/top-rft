@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
-import './ERC1358NFT.sol';
-import './ERC1358NFTMetadata.sol';
-import './ERC1358NFTEnumerable.sol';
+import './RFTNFT.sol';
+import './RFTNFTMetadata.sol';
+import './RFTNFTEnumerable.sol';
 
-contract ERC1358NFTFull is ERC1358NFT, ERC1358NFTMetadata, ERC1358NFTEnumerable {
+contract RFTNFTFull is RFTNFT, RFTNFTMetadata, RFTNFTEnumerable {
     /**
-     * @dev Constructor for full ERC-1358 NFT contract
+     * @dev Constructor for full RFT NFT contract
      * @param _name - Name for a set of NFTs
      * @param _symbol - Symbol (abbreviated from name) for a set of NFTs
      */
@@ -15,7 +15,7 @@ contract ERC1358NFTFull is ERC1358NFT, ERC1358NFTMetadata, ERC1358NFTEnumerable 
         string _symbol
     ) 
         public 
-        ERC1358NFTMetadata(
+        RFTNFTMetadata(
             _name,
             _symbol
         ) 

@@ -1,16 +1,32 @@
 pragma solidity ^0.4.24;
 
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
-import './IERC1358NFTFull.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol'; 
+import './RFTNFTFull.sol';
+import './RFTFTFull.sol';
+import './IRFT.sol';
 
-/**
- * @title ERC-1358 full interface
- * This interface implementing functionality to create ERC-1358 token
- * that has Non-Fungible structure and its value is supplied with Fungible Token
- * (ERC-20 compatible)
- */
-contract IERC1358 is IERC1358NFTFull {
-    using SafeMath for uint256;
+contract RFT is IRFT, RFTNFTFull, Ownable {
+
+    // Mapping from Non-Fungible token id to address of Fungible Token 
+    mapping (uint256 => address) public ftAddresses;
+
+    // Mapping from Non-Fungible token id to its value in equivalent of Fungible tokens
+    mapping (uint256 => uint256) public nftValues;
+
+    /**
+     * @dev Constructor for RFT main contract
+     * @param _name - Name for a set of NFTs
+     * @param _symbol - Symbol for a set of NFTs
+     */
+    constructor(
+        string _name,
+        string _symbol
+    ) 
+        public
+        RFTNFTFull(_name, _symbol) 
+    {
+
+    } 
 
     /**
      * @dev Creates FT with specified parameters
@@ -29,8 +45,25 @@ contract IERC1358 is IERC1358NFTFull {
         uint256 _fungibleTokenSupply,
         uint256 _tokenId
     ) 
-        internal
-        returns (address);
+        internal 
+        returns (address)
+    {
+        require (_decimals > 0);
+        require (_tokenOwner != address(0));
+        require (_fungibleTokenSupply > 0);
+
+        RFTFTFull fungibleToken = new RFTFTFull(
+            _name,
+            _symbol,
+            _decimals,
+            _fungibleTokenSupply,
+            address(this),
+            _tokenId,
+            _tokenOwner
+        );
+
+        return address(fungibleToken);
+    }
 
     /** 
      * @dev Mint NFT token and create FT accordingly
@@ -48,7 +81,26 @@ contract IERC1358 is IERC1358NFTFull {
         uint256 _fungibleTokenSupply
     ) 
         public
-        returns (uint256);
+        returns (uint256)
+    {
+        uint256 tokenId = _allTokens.length;
+
+        address fungibleToken = _createFT(
+            _name, 
+            _symbol,
+            _decimals,
+            _tokenOwner,
+            _fungibleTokenSupply,
+            tokenId
+        );
+
+        require(super._mint(_tokenOwner, tokenId) == true);
+
+        ftAddresses[tokenId] = fungibleToken;
+        nftValues[tokenId] = _fungibleTokenSupply;
+
+        return tokenId;
+    }
 
     /** 
      * @dev Burn NFT and delete FT data
@@ -60,7 +112,13 @@ contract IERC1358 is IERC1358NFTFull {
         uint256 _tokenId
     ) 
         public
-        returns (bool);
+        returns (bool)
+    {
+        require(super._burn(_owner, _tokenId) == true);
+        ftAddresses[_tokenId] = address(0);
+        nftValues[_tokenId] = 0;
+        return true;
+    }
 
     /**
      * @dev Returns value of selected NFT
@@ -71,7 +129,10 @@ contract IERC1358 is IERC1358NFTFull {
     ) 
         public
         view 
-        returns (uint256);
+        returns (uint256)
+    {
+        return nftValues[_tokenId];
+    }
 
     /** 
      * @dev Returns FT token balance of specified NFT
@@ -84,7 +145,10 @@ contract IERC1358 is IERC1358NFTFull {
     ) 
         public 
         view 
-        returns (uint256);
+        returns (uint256) 
+    {
+        return RFTFTFull(ftAddresses[_tokenId]).balanceOf(_holder);
+    }
 
     /**
      * @dev Returns all FT token holders and their balances of specified NFT
@@ -99,7 +163,11 @@ contract IERC1358 is IERC1358NFTFull {
     ) 
         public
         view
-        returns (address[], uint256[]);
+        returns (address[], uint256[]) 
+    {
+        return RFTFTFull(ftAddresses[_tokenId])
+            .holders(_indexFrom, _indexTo);
+    }
 
     /**
      * @dev Returns FT token holders amount of specified NFT
@@ -108,7 +176,10 @@ contract IERC1358 is IERC1358NFTFull {
     function ftHoldersCount(uint256 _tokenId)
         public
         view
-        returns (uint256);
+        returns (uint256)
+    {
+        return RFTFTFull(ftAddresses[_tokenId]).holdersCount();
+    }
 
     /**
      * @dev Returns FT smart contract address of specified NFT
@@ -117,8 +188,8 @@ contract IERC1358 is IERC1358NFTFull {
     function ftAddress(uint256 _tokenId)
         public
         view
-        returns (address _ftAddress);
+        returns (address _ftAddress) 
+    {
+        return ftAddresses[_tokenId];
+    } 
 }
-
-
-

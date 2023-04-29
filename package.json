@@ -64,7 +64,7 @@
     "ethereumjs-testrpc": "^4.1.3",
     "ethereumjs-util": "^5.1.2",
     "ethjs-abi": "^0.2.1",
-    "ganache-cli": "6.1.0",
+    "ganache-cli": "6.12.2",
     "husky": "^0.14.3",
     "minimetoken": "^0.2.0",
     "mocha": "^5.0.0",
